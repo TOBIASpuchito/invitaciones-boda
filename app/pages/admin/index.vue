@@ -1,28 +1,18 @@
 <script setup lang="ts">
+import { getApiErrorMessage } from '~/utils/api-error'
+
+const api = useApiClient()
 const password = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
 
 const { data: session } = await useFetch<{ authenticated: boolean }>('/api/admin/session', {
   key: 'admin-session',
+  deep: false,
 })
 
 if (session.value?.authenticated) {
   await navigateTo('/admin/dashboard')
-}
-
-function getErrorMessage(error: unknown, fallback: string) {
-  if (error && typeof error === 'object' && 'data' in error) {
-    const data = (error as { data?: { statusMessage?: string; message?: string } }).data
-
-    return data?.statusMessage ?? data?.message ?? fallback
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message
-  }
-
-  return fallback
 }
 
 async function login() {
@@ -30,16 +20,13 @@ async function login() {
   isLoading.value = true
 
   try {
-    await $fetch('/api/admin/login', {
-      method: 'POST',
-      body: {
-        password: password.value,
-      },
+    await api.post('/api/admin/login', {
+      password: password.value,
     })
 
     await navigateTo('/admin/dashboard')
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, 'No se pudo iniciar sesion.')
+    errorMessage.value = getApiErrorMessage(error, 'No se pudo iniciar sesion.')
   } finally {
     isLoading.value = false
   }

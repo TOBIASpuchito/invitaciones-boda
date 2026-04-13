@@ -1,77 +1,48 @@
 <script setup lang="ts">
-import type { InvitationStatus, InvitationSummary } from '~/types/invitations'
+import type { InvitationSummary } from '~/types/invitations'
+import { getApiErrorMessage } from '~/utils/api-error'
 
 const config = useRuntimeConfig()
+const api = useApiClient()
 
 const guestName = ref('')
 const isSearching = ref(false)
-const hasSearched = ref(false)
 const searchError = ref('')
-const results = ref<InvitationSummary[]>([])
 
 async function searchInvitations() {
   const query = guestName.value.trim()
 
   searchError.value = ''
 
-  if (query.length < 2) {
-    searchError.value = 'Escribe al menos nombre y apellido para continuar.'
+  if (query.split(/\s+/).filter(Boolean).length < 2) {
+    searchError.value = 'Escribe tus nombres y apellidos para continuar.'
     return
   }
 
   isSearching.value = true
 
   try {
-    const response = await $fetch<{ results: InvitationSummary[] }>('/api/invitations/search', {
-      method: 'POST',
-      body: { query },
-    })
+    const response = await api.post<{ results: InvitationSummary[] }>('/api/invitations/search', { query })
+    const results = response.data.results
 
-    results.value = response.results
-    hasSearched.value = true
+    if (!results.length) {
+      searchError.value = 'No encontramos ese nombre en la lista de invitados.'
+      return
+    }
+
+    const invitation = results[0]
+
+    if (!invitation) {
+      searchError.value = 'No encontramos ese nombre en la lista de invitados.'
+      return
+    }
+
+    await navigateTo(`/invitacion/${invitation.token}`)
   } catch (error) {
-    searchError.value = getErrorMessage(error, 'No pudimos buscar tu invitacion.')
+    searchError.value = getApiErrorMessage(error, 'No pudimos buscar tu invitacion.')
   } finally {
     isSearching.value = false
   }
-}
-
-function getErrorMessage(error: unknown, fallback: string) {
-  if (error && typeof error === 'object' && 'data' in error) {
-    const data = (error as { data?: { statusMessage?: string; message?: string } }).data
-
-    return data?.statusMessage ?? data?.message ?? fallback
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message
-  }
-
-  return fallback
-}
-
-function statusLabel(status: InvitationStatus) {
-  if (status === 'confirmed') {
-    return 'Confirmada'
-  }
-
-  if (status === 'declined') {
-    return 'No asistira'
-  }
-
-  return 'Pendiente'
-}
-
-function statusClass(status: InvitationStatus) {
-  if (status === 'confirmed') {
-    return 'bg-emerald-100 text-emerald-700'
-  }
-
-  if (status === 'declined') {
-    return 'bg-stone-200 text-stone-700'
-  }
-
-  return 'bg-amber-100 text-amber-700'
 }
 </script>
 
@@ -90,21 +61,14 @@ function statusClass(status: InvitationStatus) {
         </h1>
 
         <p class="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-          Comparte un solo enlace, identifica al invitado por nombre y carga una invitacion unica para confirmar asistencia sin salir del sitio.
+          Escribe tus nombres y apellidos para encontrar tu invitacion y confirmar tu asistencia en un solo paso.
         </p>
-
-        <NuxtLink
-          to="/admin"
-          class="mt-6 inline-flex items-center rounded-full border border-blush bg-white/80 px-4 py-2 text-sm font-medium text-cocoa shadow-sm backdrop-blur transition hover:border-wine hover:text-wine"
-        >
-          Entrar como administrador
-        </NuxtLink>
 
         <div class="mt-10 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-glow backdrop-blur sm:p-8">
           <form class="space-y-4" @submit.prevent="searchInvitations">
             <div>
               <label for="guest-name" class="block text-sm font-medium text-cocoa">
-                Nombre con el que apareces en la lista
+                Nombres y apellidos
               </label>
 
               <input
@@ -112,7 +76,7 @@ function statusClass(status: InvitationStatus) {
                 v-model="guestName"
                 type="text"
                 autocomplete="name"
-                placeholder="Ej. Jane Buenaventura"
+                placeholder="Ej. Jean Buenaventura"
                 class="mt-3 w-full rounded-2xl border border-blush bg-sand/60 px-5 py-4 text-base text-cocoa outline-none transition placeholder:text-stone-400 focus:border-wine focus:ring-2 focus:ring-wine/20"
               >
             </div>
@@ -178,82 +142,10 @@ function statusClass(status: InvitationStatus) {
                 RSVP
               </p>
               <p class="mt-3 text-lg font-medium leading-7">
-                Cada resultado abre una ruta unica por token y guarda la respuesta del invitado sin exponer la base al cliente.
+                Si encontramos tu nombre, te llevaremos directo a tu invitacion para confirmar asistencia.
               </p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section v-if="hasSearched" class="relative mx-auto max-w-6xl px-6 pb-16">
-      <div class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-glow backdrop-blur sm:p-8">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
-              Resultados
-            </p>
-            <h2 class="mt-3 font-display text-3xl text-cocoa">
-              Selecciona tu invitacion
-            </h2>
-            <p class="mt-2 text-sm text-stone-500">
-              Si no te encuentras, luego podemos sumar una pantalla de ayuda o contacto directo por WhatsApp.
-            </p>
-          </div>
-
-          <div class="rounded-full bg-sand px-4 py-2 text-sm font-medium text-cocoa">
-            {{ results.length }} coincidencia<span v-if="results.length !== 1">s</span>
-          </div>
-        </div>
-
-        <div v-if="results.length > 0" class="mt-8 grid gap-4 md:grid-cols-2">
-          <article
-            v-for="invitation in results"
-            :key="invitation.token"
-            class="rounded-[1.75rem] border border-blush/70 bg-sand/70 p-6"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <p class="text-xs uppercase tracking-[0.28em] text-wine/70">
-                  {{ invitation.relationship }}
-                </p>
-                <h3 class="mt-3 font-display text-2xl leading-tight text-cocoa">
-                  {{ invitation.displayName }}
-                </h3>
-              </div>
-
-              <span
-                class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
-                :class="statusClass(invitation.status)"
-              >
-                {{ statusLabel(invitation.status) }}
-              </span>
-            </div>
-
-            <p class="mt-5 text-sm text-stone-500">
-              Cupos reservados: {{ invitation.allowedGuests }}
-            </p>
-
-            <p v-if="invitation.notes" class="mt-2 text-sm leading-6 text-stone-600">
-              {{ invitation.notes }}
-            </p>
-
-            <NuxtLink
-              :to="`/invitacion/${invitation.token}`"
-              class="mt-6 inline-flex items-center rounded-full bg-cocoa px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-wine"
-            >
-              Ver invitacion
-            </NuxtLink>
-          </article>
-        </div>
-
-        <div v-else class="mt-8 rounded-[1.75rem] border border-dashed border-blush bg-sand/60 p-8 text-center">
-          <p class="text-lg font-medium text-cocoa">
-            No encontramos coincidencias con ese nombre.
-          </p>
-          <p class="mt-2 text-sm text-stone-500">
-            En la siguiente iteracion podemos agregar alias, telefono o busqueda mas flexible para evitar errores de escritura.
-          </p>
         </div>
       </div>
     </section>

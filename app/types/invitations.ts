@@ -10,6 +10,14 @@ export interface InvitationRsvp {
   submittedAt: string
 }
 
+export interface InvitationRsvpPayload {
+  attendance: Attendance
+  confirmedCount: number
+  phone?: string
+  message?: string
+  guestNames: string[]
+}
+
 export interface InvitationSummary {
   token: string
   displayName: string

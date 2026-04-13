@@ -1,12 +1,27 @@
 <script setup lang="ts">
+import { ChevronDown, LogOut, RefreshCcw } from 'lucide-vue-next'
+import { SelectValue } from 'reka-ui'
+import DropdownMenu from '~/components/ui/dropdown-menu/DropdownMenu.vue'
+import DropdownMenuContent from '~/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '~/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import DropdownMenuLabel from '~/components/ui/dropdown-menu/DropdownMenuLabel.vue'
+import DropdownMenuSeparator from '~/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
+import DropdownMenuTrigger from '~/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import Select from '~/components/ui/select/Select.vue'
+import SelectContent from '~/components/ui/select/SelectContent.vue'
+import SelectItem from '~/components/ui/select/SelectItem.vue'
+import SelectTrigger from '~/components/ui/select/SelectTrigger.vue'
 import type { AdminInvitation, InvitationStatus } from '~/types/invitations'
+import { getApiErrorMessage } from '~/utils/api-error'
 
 const searchQuery = ref('')
 const statusFilter = ref<'all' | InvitationStatus>('all')
 const logoutLoading = ref(false)
+const api = useApiClient()
 
 const { data, pending, error, refresh } = await useFetch<{ invitations: AdminInvitation[] }>('/api/admin/invitations', {
   key: 'admin-invitations',
+  deep: false,
 })
 
 if (error.value?.statusCode === 401) {
@@ -20,6 +35,15 @@ watch(error, async (currentError) => {
 })
 
 const invitations = computed(() => data.value?.invitations ?? [])
+
+const statusFilterValue = computed({
+  get: () => statusFilter.value,
+  set: (value: string) => {
+    if (value === 'all' || value === 'confirmed' || value === 'pending' || value === 'declined') {
+      statusFilter.value = value
+    }
+  },
+})
 
 const stats = computed(() => {
   const source = invitations.value
@@ -85,8 +109,10 @@ async function logout() {
   logoutLoading.value = true
 
   try {
-    await $fetch('/api/admin/logout', { method: 'POST' })
+    await api.post('/api/admin/logout')
     await navigateTo('/admin')
+  } catch (error) {
+    console.error(getApiErrorMessage(error, 'No se pudo cerrar sesion.'))
   } finally {
     logoutLoading.value = false
   }
@@ -112,24 +138,32 @@ async function logout() {
             </p>
           </div>
 
-          <div class="flex flex-wrap gap-3">
-            <button
-              type="button"
-              class="rounded-full border border-blush bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cocoa transition hover:border-wine hover:text-wine"
-              @click="refresh()"
-            >
-              Actualizar
-            </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full border border-blush bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-cocoa transition hover:border-wine hover:text-wine"
+              >
+                Acciones
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
 
-            <button
-              type="button"
-              :disabled="logoutLoading"
-              class="rounded-full bg-cocoa px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-wine disabled:cursor-not-allowed disabled:opacity-70"
-              @click="logout"
-            >
-              {{ logoutLoading ? 'Saliendo...' : 'Cerrar sesion' }}
-            </button>
-          </div>
+            <DropdownMenuContent align="end" class="w-64">
+              <DropdownMenuLabel>Panel admin</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem @select="refresh()">
+                <RefreshCcw class="h-4 w-4 text-wine" />
+                Actualizar listado
+              </DropdownMenuItem>
+
+              <DropdownMenuItem class="text-rose-700 focus:bg-rose-50 focus:text-rose-700" :disabled="logoutLoading" @select="logout">
+                <LogOut class="h-4 w-4" />
+                {{ logoutLoading ? 'Saliendo...' : 'Cerrar sesion' }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -192,24 +226,26 @@ async function logout() {
               Estado
             </label>
 
-            <select
-              id="status-filter"
-              v-model="statusFilter"
-              class="mt-3 w-full rounded-2xl border border-blush bg-sand/60 px-5 py-4 text-base text-cocoa outline-none transition focus:border-wine focus:ring-2 focus:ring-wine/20"
-            >
-              <option value="all">
-                Todos
-              </option>
-              <option value="confirmed">
-                Confirmadas
-              </option>
-              <option value="pending">
-                Pendientes
-              </option>
-              <option value="declined">
-                No asistiran
-              </option>
-            </select>
+            <Select v-model="statusFilterValue">
+              <SelectTrigger id="status-filter" class="mt-3">
+                <SelectValue placeholder="Filtra por estado" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="all">
+                  Todos
+                </SelectItem>
+                <SelectItem value="confirmed">
+                  Confirmadas
+                </SelectItem>
+                <SelectItem value="pending">
+                  Pendientes
+                </SelectItem>
+                <SelectItem value="declined">
+                  No asistiran
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
