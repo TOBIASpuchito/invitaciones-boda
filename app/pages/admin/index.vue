@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { getApiErrorMessage } from '~/utils/api-error'
-
-const api = useApiClient()
+const { login, loginLoading: isLoading, loginError: errorMessage } = useAdminAuth()
 const password = ref('')
-const isLoading = ref(false)
-const errorMessage = ref('')
 
 const { data: session } = await useFetch<{ authenticated: boolean }>('/api/admin/session', {
   key: 'admin-session',
@@ -13,23 +9,6 @@ const { data: session } = await useFetch<{ authenticated: boolean }>('/api/admin
 
 if (session.value?.authenticated) {
   await navigateTo('/admin/dashboard')
-}
-
-async function login() {
-  errorMessage.value = ''
-  isLoading.value = true
-
-  try {
-    await api.post('/api/admin/login', {
-      password: password.value,
-    })
-
-    await navigateTo('/admin/dashboard')
-  } catch (error) {
-    errorMessage.value = getApiErrorMessage(error, 'No se pudo iniciar sesion.')
-  } finally {
-    isLoading.value = false
-  }
 }
 </script>
 
@@ -86,7 +65,7 @@ async function login() {
           Iniciar sesion
         </p>
 
-        <form class="mt-6 space-y-5" @submit.prevent="login">
+        <form class="mt-6 space-y-5" @submit.prevent="login(password)">
           <div>
             <label for="admin-password" class="block text-sm font-medium text-cocoa">
               Clave de administrador

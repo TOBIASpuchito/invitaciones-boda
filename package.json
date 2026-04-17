@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "delete-guest": "node --env-file=.env scripts/delete-guest.mjs",
     "db:schema": "node --env-file=.env --import tsx scripts/apply-schema.ts",
     "dev": "nuxt dev",
     "generate": "nuxt generate",

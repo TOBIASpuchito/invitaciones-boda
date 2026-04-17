@@ -27,8 +27,6 @@ export default defineNuxtConfig({
         && (
           process.env.NUXT_SUPABASE_DB_PASSWORD
           || process.env.NUXT_SUPABASE_SERVICE_ROLE_KEY
-          || process.env.NUXT_SUPABASE_KEY
-          || process.env.SUPABASE_KEY
         ),
       ),
     },

@@ -22,10 +22,6 @@ MVP en `Nuxt 4 + Tailwind + Supabase` para manejar:
 4. Selecciona su invitacion unica.
 5. Confirma asistencia.
 
-## Modo demo
-
-Si no configuras `Supabase`, la app usa una lista local de ejemplo para que puedas revisar la UX y el flujo completo.
-
 ## Variables de entorno
 
 Copia `.env.example` y completa lo necesario.
@@ -37,7 +33,7 @@ cp .env.example .env
 Variables principales:
 
 - `NUXT_SUPABASE_URL`
-- `NUXT_SUPABASE_SERVICE_ROLE_KEY`
+- `NUXT_SUPABASE_SERVICE_ROLE_KEY` o `NUXT_SUPABASE_DB_PASSWORD`
 - `NUXT_PUBLIC_EVENT_NAME`
 - `NUXT_PUBLIC_EVENT_DATE`
 - `NUXT_PUBLIC_EVENT_TIME`
@@ -62,6 +58,8 @@ bun install
 bun run dev
 ```
 
+Si faltan credenciales de `Supabase` o `Postgres`, la app falla de forma explicita y no usa datos falsos.
+
 Servidor local en `http://localhost:3000`.
 
 ## Estructura clave
@@ -69,8 +67,21 @@ Servidor local en `http://localhost:3000`.
 - `app/pages/index.vue`: pantalla de busqueda
 - `app/pages/invitacion/[token].vue`: invitacion unica + RSVP
 - `server/api/invitations/*`: APIs del MVP
-- `server/utils/invitations-repository.ts`: acceso a datos local o Supabase
-- `server/data/mock-invitations.ts`: invitados demo
+- `server/utils/invitations-repository.ts`: acceso a datos en Supabase/Postgres
+
+## Eliminar un invitado
+
+El borrado de un invitado tambien elimina sus RSVP por la relacion `on delete cascade` en la tabla `rsvps`.
+
+```bash
+npm run delete-guest -- --token "jean-buenaventura"
+```
+
+Tambien puedes borrar por `id`:
+
+```bash
+npm run delete-guest -- --id "uuid-del-invitado"
+```
 
 ## Siguiente iteracion recomendada
 

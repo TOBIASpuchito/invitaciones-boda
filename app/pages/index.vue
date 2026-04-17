@@ -1,49 +1,6 @@
 <script setup lang="ts">
-import type { InvitationSummary } from '~/types/invitations'
-import { getApiErrorMessage } from '~/utils/api-error'
-
 const config = useRuntimeConfig()
-const api = useApiClient()
-
-const guestName = ref('')
-const isSearching = ref(false)
-const searchError = ref('')
-
-async function searchInvitations() {
-  const query = guestName.value.trim()
-
-  searchError.value = ''
-
-  if (query.split(/\s+/).filter(Boolean).length < 2) {
-    searchError.value = 'Escribe tus nombres y apellidos para continuar.'
-    return
-  }
-
-  isSearching.value = true
-
-  try {
-    const response = await api.post<{ results: InvitationSummary[] }>('/api/invitations/search', { query })
-    const results = response.data.results
-
-    if (!results.length) {
-      searchError.value = 'No encontramos ese nombre en la lista de invitados.'
-      return
-    }
-
-    const invitation = results[0]
-
-    if (!invitation) {
-      searchError.value = 'No encontramos ese nombre en la lista de invitados.'
-      return
-    }
-
-    await navigateTo(`/invitacion/${invitation.token}`)
-  } catch (error) {
-    searchError.value = getApiErrorMessage(error, 'No pudimos buscar tu invitacion.')
-  } finally {
-    isSearching.value = false
-  }
-}
+const { guestName, isSearching, error: searchError, search: searchInvitations } = useInvitationSearch()
 </script>
 
 <template>
@@ -94,7 +51,7 @@ async function searchInvitations() {
             </p>
 
             <p v-if="!config.public.usingSupabase" class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Modo demo activo. La app esta funcionando con invitados de ejemplo hasta conectar Supabase.
+              Configuracion incompleta. Debes conectar Supabase o Postgres para poder buscar invitaciones reales.
             </p>
           </form>
         </div>

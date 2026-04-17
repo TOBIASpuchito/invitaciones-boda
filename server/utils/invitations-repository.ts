@@ -2,15 +2,20 @@ import { createClient } from '@supabase/supabase-js'
 import { createError } from 'h3'
 import { useRuntimeConfig } from '#imports'
 
-import {
-  mockInvitations,
-  type Attendance,
-  type InvitationRecord,
-  type InvitationRsvpRecord,
-  type InvitationStatus,
-} from '../data/mock-invitations'
 import { getSupabaseDatabasePool } from './database'
-import { normalizeText } from './text'
+import { normalizeText, slugifyText } from './text'
+
+export type InvitationStatus = 'pending' | 'confirmed' | 'declined'
+export type Attendance = 'yes' | 'no'
+
+export interface InvitationRsvpRecord {
+  attendance: Attendance
+  confirmedCount: number
+  phone?: string | null
+  message?: string | null
+  guestNames: string[]
+  submittedAt: string
+}
 
 export interface InvitationSummary {
   token: string
@@ -39,6 +44,14 @@ export interface RsvpPayload {
   phone?: string
   message?: string
   guestNames: string[]
+}
+
+export interface AdminCreateInvitationPayload {
+  displayName: string
+  namedGuests: string[]
+  relationship: string
+  allowedGuests: number
+  notes?: string
 }
 
 interface SupabaseInvitationRow {
@@ -75,11 +88,9 @@ interface DatabaseInvitationRow extends SupabaseInvitationRow {
   rsvp_submitted_at: string | null
 }
 
-const localStore: InvitationRecord[] = mockInvitations.map((invitation) => structuredClone(invitation))
-
 function getSupabaseAdminClient() {
   const config = useRuntimeConfig()
-  const supabaseKey = config.supabaseServiceRoleKey || config.supabaseKey
+  const supabaseKey = config.supabaseServiceRoleKey
 
   if (!config.supabaseUrl || !supabaseKey) {
     return null
@@ -111,33 +122,44 @@ function scoreInvitation(displayName: string, namedGuests: string[], normalizedQ
   return 3
 }
 
-function toInvitationSummary(invitation: InvitationRecord): InvitationSummary {
-  return {
-    token: invitation.token,
-    displayName: invitation.displayName,
-    relationship: invitation.relationship,
-    allowedGuests: invitation.allowedGuests,
-    notes: invitation.notes,
-    status: invitation.status,
+function buildInvitationSearchName(displayName: string, relationship: string, namedGuests: string[]) {
+  return normalizeText([displayName, relationship, ...namedGuests].join(' '))
+}
+
+function assertDataAccessConfigured(
+  database: ReturnType<typeof getSupabaseDatabasePool>,
+  client: ReturnType<typeof getSupabaseAdminClient>,
+) {
+  if (!database && !client) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'La aplicacion no tiene acceso configurado a Supabase o Postgres.',
+    })
   }
 }
 
-function toInvitationDetail(invitation: InvitationRecord): InvitationDetail {
-  return {
-    ...toInvitationSummary(invitation),
-    namedGuests: invitation.namedGuests,
-    confirmedCount: invitation.confirmedCount,
-    rsvp: invitation.rsvp,
+function requireSupabaseAdminClient(client: ReturnType<typeof getSupabaseAdminClient>) {
+  if (!client) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Falta NUXT_SUPABASE_SERVICE_ROLE_KEY para operar contra Supabase.',
+    })
   }
+
+  return client
 }
 
-function toAdminInvitation(invitation: InvitationRecord): AdminInvitation {
-  return {
-    id: invitation.id,
-    ...toInvitationDetail(invitation),
-    createdAt: invitation.rsvp?.submittedAt ?? new Date().toISOString(),
-    updatedAt: invitation.rsvp?.submittedAt ?? new Date().toISOString(),
+async function generateUniqueToken(displayName: string, tokenExists: (token: string) => Promise<boolean>) {
+  const baseToken = slugifyText(displayName) || 'invitado'
+  let token = baseToken
+  let suffix = 2
+
+  while (await tokenExists(token)) {
+    token = `${baseToken}-${suffix}`
+    suffix += 1
   }
+
+  return token
 }
 
 function mapRsvp(rsvp: SupabaseRsvpRow | null): InvitationRsvpRecord | null {
@@ -227,6 +249,8 @@ export async function searchInvitations(query: string) {
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
 
+  assertDataAccessConfigured(database, client)
+
   if (database) {
     const { rows } = await database.query<SupabaseInvitationRow>(
       `
@@ -254,19 +278,9 @@ export async function searchInvitations(query: string) {
       }))
   }
 
-  if (!client) {
-    return localStore
-      .filter((invitation) => invitation.searchName.includes(normalizedQuery))
-      .sort((left, right) => {
-        const scoreDiff = scoreInvitation(left.displayName, left.namedGuests, normalizedQuery) - scoreInvitation(right.displayName, right.namedGuests, normalizedQuery)
+  const supabaseClient = requireSupabaseAdminClient(client)
 
-        return scoreDiff || left.displayName.localeCompare(right.displayName)
-      })
-      .slice(0, 8)
-      .map(toInvitationSummary)
-  }
-
-  const { data, error } = await client
+  const { data, error } = await supabaseClient
     .from('invitations')
     .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name')
     .ilike('search_name', `%${normalizedQuery}%`)
@@ -277,12 +291,12 @@ export async function searchInvitations(query: string) {
   }
 
   return ((data ?? []) as SupabaseInvitationRow[])
-    .sort((left, right) => {
+    .sort((left: SupabaseInvitationRow, right: SupabaseInvitationRow) => {
       const scoreDiff = scoreInvitation(left.display_name, left.named_guests, normalizedQuery) - scoreInvitation(right.display_name, right.named_guests, normalizedQuery)
 
       return scoreDiff || left.display_name.localeCompare(right.display_name)
     })
-    .map((row) => ({
+    .map((row: SupabaseInvitationRow) => ({
       token: row.token,
       displayName: row.display_name,
       relationship: row.relationship,
@@ -295,6 +309,8 @@ export async function searchInvitations(query: string) {
 export async function getInvitationByToken(token: string) {
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
+
+  assertDataAccessConfigured(database, client)
 
   if (database) {
     const { rows } = await database.query<DatabaseInvitationRow>(
@@ -335,10 +351,7 @@ export async function getInvitationByToken(token: string) {
     return rows[0] ? mapDatabaseInvitation(rows[0]) : null
   }
 
-  if (!client) {
-    const invitation = localStore.find((entry) => entry.token === token)
-    return invitation ? toInvitationDetail(invitation) : null
-  }
+  const supabaseClient = requireSupabaseAdminClient(client)
 
   const invitationRow = await findSupabaseInvitationByToken(token)
 
@@ -346,7 +359,7 @@ export async function getInvitationByToken(token: string) {
     return null
   }
 
-  const { data, error } = await client
+  const { data, error } = await supabaseClient
     .from('rsvps')
     .select('attendance, confirmed_count, phone, message, guest_names, submitted_at')
     .eq('invitation_id', invitationRow.id)
@@ -365,6 +378,8 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
   const status: InvitationStatus = payload.attendance === 'yes' ? 'confirmed' : 'declined'
+
+  assertDataAccessConfigured(database, client)
 
   if (database) {
     const connection = await database.connect()
@@ -412,26 +427,7 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
     }
   }
 
-  if (!client) {
-    const invitation = localStore.find((entry) => entry.token === token)
-
-    if (!invitation) {
-      return null
-    }
-
-    invitation.status = status
-    invitation.confirmedCount = payload.confirmedCount
-    invitation.rsvp = {
-      attendance: payload.attendance,
-      confirmedCount: payload.confirmedCount,
-      phone: payload.phone ?? null,
-      message: payload.message ?? null,
-      guestNames: payload.guestNames,
-      submittedAt: new Date().toISOString(),
-    }
-
-    return toInvitationDetail(invitation)
-  }
+  const supabaseClient = requireSupabaseAdminClient(client)
 
   const invitationRow = await findSupabaseInvitationByToken(token)
 
@@ -439,7 +435,7 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
     return null
   }
 
-  const { error: insertError } = await client.from('rsvps').insert({
+  const { error: insertError } = await supabaseClient.from('rsvps').insert({
     invitation_id: invitationRow.id,
     attendance: payload.attendance,
     confirmed_count: payload.confirmedCount,
@@ -452,7 +448,7 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
     throw createError({ statusCode: 500, statusMessage: 'No se pudo guardar la respuesta RSVP.' })
   }
 
-  const { error: updateError } = await client
+  const { error: updateError } = await supabaseClient
     .from('invitations')
     .update({
       status,
@@ -468,9 +464,123 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
   return getInvitationByToken(token)
 }
 
+export async function createAdminInvitation(payload: AdminCreateInvitationPayload) {
+  const database = getSupabaseDatabasePool()
+  const client = getSupabaseAdminClient()
+  const searchName = buildInvitationSearchName(payload.displayName, payload.relationship, payload.namedGuests)
+  const notes = payload.notes?.trim() || null
+
+  assertDataAccessConfigured(database, client)
+
+  if (database) {
+    const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
+      const { rows } = await database.query<{ id: string }>(
+        `select id from public.invitations where token = $1 limit 1`,
+        [candidateToken],
+      )
+
+      return Boolean(rows[0])
+    })
+
+    const { rows } = await database.query<SupabaseInvitationRow>(
+      `
+        insert into public.invitations (
+          token,
+          display_name,
+          named_guests,
+          relationship,
+          allowed_guests,
+          notes,
+          search_name,
+          status,
+          confirmed_count
+        )
+        values ($1, $2, $3::text[], $4, $5, $6, $7, 'pending', null)
+        returning id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at
+      `,
+      [token, payload.displayName, payload.namedGuests, payload.relationship, payload.allowedGuests, notes, searchName],
+    )
+
+    if (!rows[0]) {
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+    }
+
+    return mapAdminInvitation(rows[0], null)
+  }
+
+  const supabaseClient = requireSupabaseAdminClient(client)
+  const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
+    const { data, error } = await supabaseClient
+      .from('invitations')
+      .select('id')
+      .eq('token', candidateToken)
+      .maybeSingle()
+
+    if (error) {
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo validar el token de la invitacion.' })
+    }
+
+    return Boolean(data)
+  })
+
+  const { data, error } = await supabaseClient
+    .from('invitations')
+    .insert({
+      token,
+      display_name: payload.displayName,
+      named_guests: payload.namedGuests,
+      relationship: payload.relationship,
+      allowed_guests: payload.allowedGuests,
+      notes,
+      search_name: searchName,
+      status: 'pending',
+      confirmed_count: null,
+    })
+    .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
+    .single()
+
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+  }
+
+  return mapAdminInvitation(data as SupabaseInvitationRow, null)
+}
+
+export async function deleteAdminInvitation(id: string) {
+  const database = getSupabaseDatabasePool()
+  const client = getSupabaseAdminClient()
+
+  assertDataAccessConfigured(database, client)
+
+  if (database) {
+    const { rows } = await database.query<{ id: string }>(
+      `delete from public.invitations where id = $1 returning id`,
+      [id],
+    )
+
+    return Boolean(rows[0])
+  }
+
+  const supabaseClient = requireSupabaseAdminClient(client)
+  const { data, error } = await supabaseClient
+    .from('invitations')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo eliminar la invitacion.' })
+  }
+
+  return Boolean(data)
+}
+
 export async function listAdminInvitations() {
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
+
+  assertDataAccessConfigured(database, client)
 
   if (database) {
     const { rows } = await database.query<DatabaseInvitationRow>(
@@ -509,19 +619,14 @@ export async function listAdminInvitations() {
     return rows.map(mapDatabaseInvitation)
   }
 
-  if (!client) {
-    return localStore
-      .slice()
-      .sort((left, right) => left.displayName.localeCompare(right.displayName))
-      .map(toAdminInvitation)
-  }
+  const supabaseClient = requireSupabaseAdminClient(client)
 
   const [{ data: invitationsData, error: invitationsError }, { data: rsvpsData, error: rsvpsError }] = await Promise.all([
-    client
+    supabaseClient
       .from('invitations')
       .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
       .order('display_name', { ascending: true }),
-    client
+    supabaseClient
       .from('rsvps')
       .select('invitation_id, attendance, confirmed_count, phone, message, guest_names, submitted_at')
       .order('submitted_at', { ascending: false }),

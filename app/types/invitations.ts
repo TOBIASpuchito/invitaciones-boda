@@ -38,3 +38,11 @@ export interface AdminInvitation extends InvitationDetail {
   createdAt: string
   updatedAt: string
 }
+
+export interface AdminCreateInvitationPayload {
+  displayName: string
+  namedGuests: string[]
+  relationship: string
+  allowedGuests: number
+  notes?: string
+}

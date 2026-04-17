@@ -1,25 +1,15 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
-import type { InvitationDetail, InvitationRsvpPayload } from '~/types/invitations'
-import { getApiErrorMessage } from '~/utils/api-error'
 
 const route = useRoute()
 const config = useRuntimeConfig()
 const token = route.params.token as string
-const api = useApiClient()
 
 const InvitationLetterOpeningAnimation = defineAsyncComponent(() => import('~/components/invitation/LetterOpeningAnimation.vue'))
 
-const { data, pending, error } = await useFetch<{ invitation: InvitationDetail }>(`/api/invitations/${token}`, {
-  key: `invitation-${token}`,
-  deep: false,
-})
+const { invitation, pending, error, isSaving, submitError, submitSuccess, submit: submitRsvp } = await useInvitation(token)
 
-const invitation = computed(() => data.value?.invitation ?? null)
 const showOpeningAnimation = ref(false)
-const isSaving = ref(false)
-const submitError = ref('')
-const submitSuccess = ref('')
 const hasPlayedOpeningAnimation = ref(false)
 
 watch(
@@ -39,28 +29,6 @@ watch(
 
 function handleOpeningAnimationComplete() {
   showOpeningAnimation.value = false
-}
-
-async function submitRsvp(payload: InvitationRsvpPayload) {
-  if (!invitation.value) {
-    return
-  }
-
-  submitError.value = ''
-  submitSuccess.value = ''
-
-  isSaving.value = true
-
-  try {
-    const response = await api.post<{ invitation: InvitationDetail; message: string }>(`/api/invitations/${token}/rsvp`, payload)
-
-    data.value = { invitation: response.data.invitation }
-    submitSuccess.value = response.data.message
-  } catch (error) {
-    submitError.value = getApiErrorMessage(error, 'No pudimos guardar tu respuesta.')
-  } finally {
-    isSaving.value = false
-  }
 }
 </script>
 
