@@ -33,20 +33,28 @@ function handleOpeningAnimationComplete() {
 </script>
 
 <template>
-  <main class="min-h-screen px-6 py-10 sm:py-14">
+  <main class="relative min-h-screen px-6 py-10 sm:py-14">
+    <InvitationFloralDecoration />
     <InvitationLetterOpeningAnimation
       v-if="invitation && showOpeningAnimation"
       :guest-name="invitation.displayName"
       :event-name="config.public.eventName"
+      :event-date="config.public.eventDate"
+      :event-time="config.public.eventTime"
+      :event-venue="config.public.eventVenue"
       @complete="handleOpeningAnimationComplete"
     />
 
-    <div class="mx-auto max-w-5xl">
+    <div class="relative z-10 mx-auto max-w-2xl">
       <NuxtLink
         to="/"
-        class="inline-flex items-center rounded-full border border-blush bg-white/80 px-4 py-2 text-sm font-medium text-cocoa shadow-sm backdrop-blur transition hover:border-wine hover:text-wine"
+        class="inline-flex items-center gap-2 rounded-full border border-blush bg-white/80 px-4 py-2 text-sm font-medium text-cocoa shadow-sm backdrop-blur transition hover:border-wine hover:text-wine"
       >
-        Cambiar nombre
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/>
+          <path d="M12 19l-7-7 7-7"/>
+        </svg>
+        Volver a la pantalla inicial
       </NuxtLink>
 
       <div v-if="pending && !invitation" class="mt-8 rounded-[2rem] border border-white/70 bg-white/80 p-8 text-center shadow-glow backdrop-blur">
@@ -69,16 +77,11 @@ function handleOpeningAnimationComplete() {
 
       <div
         v-else
-        class="mt-8 grid gap-6 transition duration-700 ease-out lg:grid-cols-[1.1fr_0.9fr]"
+        class="mt-8 flex flex-col gap-6 transition duration-700 ease-out"
         :class="showOpeningAnimation ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'"
       >
         <InvitationDetailsCard
           :invitation="invitation"
-          :event-date="config.public.eventDate"
-          :event-time="config.public.eventTime"
-          :event-venue="config.public.eventVenue"
-          :event-address="config.public.eventAddress"
-          :event-map-url="config.public.eventMapUrl"
           :rsvp-deadline="config.public.rsvpDeadline"
         />
 

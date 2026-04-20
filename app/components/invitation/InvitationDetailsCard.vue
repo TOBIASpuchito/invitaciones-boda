@@ -3,11 +3,6 @@ import type { InvitationDetail } from '~/types/invitations'
 
 defineProps<{
   invitation: InvitationDetail
-  eventDate: string
-  eventTime: string
-  eventVenue: string
-  eventAddress: string
-  eventMapUrl: string
   rsvpDeadline: string
 }>()
 </script>
@@ -25,6 +20,18 @@ defineProps<{
     <p class="mt-4 text-lg leading-8 text-stone-600">
       Nos encantaria celebrar contigo este momento tan importante. Esta pagina representa la invitacion unica para tu registro.
     </p>
+
+    <blockquote class="mt-6 border-l-2 border-wine/30 pl-5 space-y-2">
+      <p class="text-sm leading-7 text-stone-500 italic">Hace 12 años el destino nos unió&hellip;</p>
+      <p class="text-sm leading-7 text-stone-500 italic">y desde entonces, no hemos dejado de elegirnos.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Construimos una familia, un hogar y un amor que nos transformó.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Y ahora, damos un paso más: unir nuestras vidas para siempre.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Este no es solo nuestro día, es la celebración de una historia que sigue creciendo.</p>
+    </blockquote>
+
+    <div class="mt-8 rounded-[1.75rem] border border-white/70 bg-white/60 px-6 py-5 shadow-sm backdrop-blur">
+      <InvitationWeddingCountdown />
+    </div>
 
     <div class="mt-8 flex flex-wrap gap-3">
       <span class="rounded-full bg-sand px-4 py-2 text-sm font-medium text-cocoa">
@@ -58,45 +65,202 @@ defineProps<{
       </p>
     </div>
 
-    <div class="mt-6 grid gap-4 sm:grid-cols-2">
-      <div class="rounded-[1.75rem] border border-blush/70 bg-sand/70 p-6">
-        <p class="text-xs uppercase tracking-[0.25em] text-stone-500">
-          Fecha
-        </p>
-        <p class="mt-3 font-display text-2xl text-cocoa">
-          {{ eventDate }}
-        </p>
+    <!-- Widgets animados de detalles del evento -->
+    <div class="detail-widgets mt-6 grid gap-4 sm:grid-cols-2">
+
+      <!-- Fecha -->
+      <div class="widget widget--date" style="--delay: 0ms">
+        <div class="widget-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="3" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+        <p class="widget-label">Fecha</p>
+        <p class="widget-value">25 de julio de 2026</p>
+        <div class="widget-ring" />
       </div>
 
-      <div class="rounded-[1.75rem] border border-blush/70 bg-sand/70 p-6">
-        <p class="text-xs uppercase tracking-[0.25em] text-stone-500">
-          Hora
-        </p>
-        <p class="mt-3 font-display text-2xl text-cocoa">
-          {{ eventTime }}
-        </p>
+      <!-- Hora -->
+      <div class="widget widget--time" style="--delay: 80ms">
+        <div class="widget-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <polyline points="12 7 12 12 15.5 15.5" />
+          </svg>
+        </div>
+        <p class="widget-label">Hora de inicio</p>
+        <p class="widget-value">14h00</p>
+        <div class="widget-ring" />
       </div>
 
-      <div class="rounded-[1.75rem] border border-blush/70 bg-sand/70 p-6 sm:col-span-2">
-        <p class="text-xs uppercase tracking-[0.25em] text-stone-500">
-          Lugar
-        </p>
-        <p class="mt-3 text-xl font-semibold text-cocoa">
-          {{ eventVenue }}
-        </p>
-        <p class="mt-2 text-sm leading-6 text-stone-500">
-          {{ eventAddress }}
-        </p>
-
+      <!-- Lugar -->
+      <div class="widget widget--venue sm:col-span-2" style="--delay: 160ms">
+        <div class="widget-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+        </div>
+        <p class="widget-label">Lugar</p>
+        <p class="widget-value">Quinta Boutique Kristal</p>
+        <p class="mt-1 text-sm leading-6 text-stone-500">Principal de San Francisco de Alpahuma. Valle de los Chillos &mdash; Quito</p>
         <a
-          :href="eventMapUrl"
+          href="https://www.google.com/maps/place/Quinta+Krystal+Hotel+Boutique/@-0.3423903,-78.4017385,17z/data=!3m1!4b1!4m9!3m8!1s0x91d5bde0cde41817:0xe919a005646f845d!5m2!4m1!1i2!8m2!3d-0.3423903!4d-78.4017385!16s%2Fg%2F11hf8477wj?entry=tts"
           target="_blank"
           rel="noreferrer"
-          class="mt-5 inline-flex items-center rounded-full bg-cocoa px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-wine"
+          class="map-btn mt-4"
         >
-          Abrir mapa
+          <svg class="map-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 11 22 2 13 21 11 13 3 11" />
+          </svg>
+          Abrir en Google Maps
         </a>
+        <div class="widget-ring" />
       </div>
+
     </div>
+
+    <InvitationGiftSection />
   </section>
 </template>
+
+<style scoped>
+/* ── base widget ──────────────────────────────────────────── */
+.widget {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(222, 195, 193, 0.55);
+  background: linear-gradient(145deg, #ffffff 0%, #fdf6f4 100%);
+  padding: 1.5rem;
+  box-shadow:
+    0 2px 12px rgba(120, 60, 70, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: widgetIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--delay, 0ms);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.widget:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 28px rgba(120, 60, 70, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes widgetIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ── decorative animated ring in corner ──────────────────── */
+.widget-ring {
+  position: absolute;
+  bottom: -2rem;
+  right: -2rem;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(180, 100, 110, 0.10);
+  animation: ringPulse 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.widget-ring::before {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  border: 1px solid rgba(180, 100, 110, 0.08);
+  animation: ringPulse 3.5s ease-in-out 0.6s infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.06); }
+}
+
+/* ── icon ─────────────────────────────────────────────────── */
+.widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.75rem;
+  background: rgba(180, 80, 90, 0.08);
+  color: rgba(140, 50, 65, 0.8);
+  margin-bottom: 0.85rem;
+}
+
+.widget-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.widget-icon--large {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.9rem;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.widget-icon--large svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* ── venue layout ─────────────────────────────────────────── */
+.widget--venue {
+  display: block;
+}
+
+/* ── typography ───────────────────────────────────────────── */
+.widget-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(100, 70, 75, 0.55);
+}
+
+.widget-value {
+  margin-top: 0.45rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: #4a2830;
+}
+
+/* ── map button ───────────────────────────────────────────── */
+.map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 9999px;
+  background: #4a2830;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.map-btn:hover {
+  background: #7a1f35;
+  transform: translateY(-1px);
+}
+
+.map-btn-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+</style>

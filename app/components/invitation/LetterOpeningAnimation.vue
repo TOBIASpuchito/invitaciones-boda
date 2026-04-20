@@ -8,7 +8,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   complete: []
+  musicChoice: [withMusic: boolean]
 }>()
+
+const started = ref(false)
 
 const overlayRef = ref<HTMLElement | null>(null)
 const envelopeRef = ref<HTMLElement | null>(null)
@@ -23,40 +26,48 @@ const coverRef = ref<HTMLElement | null>(null)
 
 let tl: gsap.core.Timeline | null = null
 
-function buildTimeline() {
-  tl = gsap.timeline()
-
-  tl.to(envelopeRef.value, {
+function showEnvelope() {
+  gsap.to(envelopeRef.value, {
     opacity: 1, y: 0, scale: 1,
     duration: 0.7, ease: 'back.out(1.4)',
-  }, 0)
+  })
+}
+
+function choose(withMusic: boolean) {
+  started.value = true
+  emit('musicChoice', withMusic)
+  buildTimeline()
+}
+
+function buildTimeline() {
+  tl = gsap.timeline()
 
   tl.to(sealRef.value, {
     opacity: 0, scale: 0.1, rotation: 42,
     duration: 0.28, ease: 'back.in(3)',
-  }, 0.85)
+  }, 0)
 
   tl.to(flapRef.value, {
     rotateX: -180,
     duration: 0.85, ease: 'power3.inOut',
-  }, 1.0)
+  }, 0.15)
 
   // A mitad del giro la solapa pasa al plano trasero del sobre
-  tl.set(flapRef.value, { zIndex: 1 }, 1.43)
+  tl.set(flapRef.value, { zIndex: 1 }, 0.58)
 
   tl.to(paperRef.value, {
     y: '-55%',
     duration: 0.85, ease: 'power2.inOut',
-  }, 1.75)
+  }, 0.9)
 
   tl.to(paperRef.value, {
     y: '-50%',
     duration: 0.28, ease: 'elastic.out(1, 0.5)',
-  }, 2.6)
+  }, 1.75)
 
-  tl.to(eyebrowRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 2.45)
-  tl.to(nameRef.value, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }, 2.65)
-  tl.to(eventRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 2.85)
+  tl.to(eyebrowRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 1.6)
+  tl.to(nameRef.value, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }, 1.8)
+  tl.to(eventRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 2.0)
 
   tl.call(() => {
     if (!sheetRef.value || !coverRef.value) return
@@ -70,22 +81,22 @@ function buildTimeline() {
       height: rect.height,
       borderRadius: '1rem',
     })
-  }, undefined, 3.8)
+  }, undefined, 2.95)
 
-  tl.to(envelopeRef.value, { opacity: 0, duration: 0.22 }, 3.8)
+  tl.to(envelopeRef.value, { opacity: 0, duration: 0.22 }, 2.95)
 
   tl.to(coverRef.value, {
     top: 0, left: 0,
     width: '100%', height: '100%',
     borderRadius: 0,
     duration: 0.82, ease: 'expo.inOut',
-  }, 3.85)
+  }, 3.0)
 
   tl.to(coverRef.value, {
     opacity: 0,
     duration: 0.48, ease: 'power2.inOut',
     onComplete: () => emit('complete'),
-  }, 4.68)
+  }, 3.83)
 }
 
 onMounted(() => {
@@ -102,7 +113,7 @@ onMounted(() => {
   gsap.set(eventRef.value, { opacity: 0, y: 8 })
   gsap.set(coverRef.value, { display: 'none' })
 
-  buildTimeline()
+  showEnvelope()
 })
 
 onBeforeUnmount(() => {
@@ -114,6 +125,7 @@ onBeforeUnmount(() => {
   <div ref="overlayRef" class="anim-overlay">
     <div class="anim-bg" />
 
+    <div class="anim-group">
     <div class="anim-scene">
       <div ref="envelopeRef" class="env">
 
@@ -139,6 +151,21 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <Transition name="choices-fade">
+      <div v-if="!started" class="anim-choices">
+        <p class="anim-choices-label">¿Cómo quieres abrir tu carta?</p>
+        <div class="anim-choices-btns">
+          <button class="anim-btn anim-btn--music" @click="choose(true)">
+            <span class="anim-btn-icon">♪</span> Con música
+          </button>
+          <button class="anim-btn" @click="choose(false)">
+            Sin música
+          </button>
+        </div>
+      </div>
+    </Transition>
+    </div>
+
     <div ref="coverRef" class="anim-cover" />
   </div>
 </template>
@@ -151,13 +178,13 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: linear-gradient(155deg, #fdf6ee 0%, #f4e0ce 100%);
+  background: #ffffff;
 }
 
 .anim-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.5) 0%, transparent 28%);
+  background: radial-gradient(circle at 22% 20%, rgba(240, 240, 240, 0.4) 0%, transparent 28%);
   pointer-events: none;
 }
 
@@ -192,9 +219,9 @@ onBeforeUnmount(() => {
   inset: 0;
   z-index: 1;
   border-radius: 14px;
-  background: linear-gradient(145deg, #fdf8ed 0%, #f0d9b0 60%, #e4c790 100%);
-  border: 1px solid rgba(188, 152, 88, 0.24);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .paper {
@@ -208,10 +235,10 @@ onBeforeUnmount(() => {
   width: 100%;
   padding: 1.4rem 1.1rem 1.3rem;
   border-radius: 8px;
-  background: linear-gradient(180deg, #ffffff 0%, #faf5ee 100%);
+  background: #ffffff;
   box-shadow:
-    0 3px 12px rgba(100, 76, 38, 0.14),
-    0 1px 3px rgba(100, 76, 38, 0.06);
+    0 3px 12px rgba(0, 0, 0, 0.10),
+    0 1px 3px rgba(0, 0, 0, 0.05);
   text-align: center;
 }
 
@@ -257,12 +284,12 @@ onBeforeUnmount(() => {
   right: 0;
   bottom: 0;
   z-index: 3;
-  background: linear-gradient(172deg, #fdf3de 0%, #e8cd98 100%);
+  background: #f5f5f5;
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
   border-top-left-radius: 50% 38%;
   border-top-right-radius: 50% 38%;
-  box-shadow: inset 0 2px 6px rgba(170, 138, 80, 0.12);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .env-flap {
@@ -273,7 +300,8 @@ onBeforeUnmount(() => {
   z-index: 4;
   transform-origin: center top;
   clip-path: polygon(0 0, 100% 0, 50% 84%);
-  background: linear-gradient(165deg, #fefaec 0%, #ecdbad 55%, #ddc38a 100%);
+  background: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 .seal {
@@ -284,25 +312,23 @@ onBeforeUnmount(() => {
   height: 3.4rem;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 35%, rgba(255, 250, 190, 0.9) 0%, transparent 24%),
-    radial-gradient(circle, #ffe055 0%, #f5a800 52%, #c07800 100%);
-  border: 2px solid rgba(150, 85, 0, 0.5);
+  background: #ffffff;
+  border: 2px solid rgba(100, 40, 60, 0.25);
   box-shadow:
-    0 4px 14px rgba(135, 85, 0, 0.28),
-    inset 0 1px 0 rgba(255, 246, 160, 0.9);
+    0 4px 14px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .seal-ring {
   position: absolute;
   inset: 22%;
   border-radius: 50%;
-  border: 1.5px solid rgba(145, 82, 0, 0.4);
+  border: 1.5px solid rgba(100, 40, 60, 0.2);
 }
 
 .anim-cover {
   position: absolute;
-  background: linear-gradient(180deg, #ffffff 0%, #faf5ee 100%);
+  background: #ffffff;
 }
 
 @media (max-width: 480px) {
@@ -318,5 +344,77 @@ onBeforeUnmount(() => {
     width: 2.9rem;
     height: 2.9rem;
   }
+}
+
+.anim-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.anim-choices {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+.anim-choices-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(60, 30, 40, 0.55);
+}
+
+.anim-choices-btns {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.anim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(100, 40, 60, 0.25);
+  background: #ffffff;
+  color: rgba(60, 30, 40, 0.75);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.anim-btn:hover {
+  border-color: rgba(100, 40, 60, 0.55);
+  color: rgba(60, 20, 30, 1);
+  transform: translateY(-1px);
+}
+
+.anim-btn--music {
+  background: rgba(100, 40, 60, 0.06);
+}
+
+.anim-btn-icon {
+  font-style: normal;
+}
+
+.choices-fade-enter-active,
+.choices-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.choices-fade-enter-from,
+.choices-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 </style>

@@ -15,13 +15,13 @@ export default defineNuxtConfig({
     supabaseDbPassword: process.env.NUXT_SUPABASE_DB_PASSWORD ?? '',
     adminPassword: process.env.NUXT_ADMIN_PASSWORD ?? '',
     public: {
-      eventName: process.env.NUXT_PUBLIC_EVENT_NAME ?? 'Boda de Camila & Andres',
-      eventDate: process.env.NUXT_PUBLIC_EVENT_DATE ?? 'Sabado 14 de febrero de 2026',
-      eventTime: process.env.NUXT_PUBLIC_EVENT_TIME ?? '16:00',
-      eventVenue: process.env.NUXT_PUBLIC_EVENT_VENUE ?? 'Hacienda Jardin de Abril',
-      eventAddress: process.env.NUXT_PUBLIC_EVENT_ADDRESS ?? 'Quito, Ecuador',
-      eventMapUrl: process.env.NUXT_PUBLIC_EVENT_MAP_URL ?? 'https://maps.google.com',
-      rsvpDeadline: process.env.NUXT_PUBLIC_RSVP_DEADLINE ?? '31 de enero de 2026',
+      eventName: 'Boda de Camila & Andres',
+      eventDate: '25 de julio de 2026',
+      eventTime: '14h00',
+      eventVenue: 'Quinta Boutique Kristal',
+      eventAddress: 'Principal de San Francisco de Alpahuma. Valle de los Chillos — Quito',
+      eventMapUrl: 'https://www.google.com/maps/place/Quinta+Krystal+Hotel+Boutique/@-0.3423903,-78.4017385,17z/data=!3m1!4b1!4m9!3m8!1s0x91d5bde0cde41817:0xe919a005646f845d!5m2!4m1!1i2!8m2!3d-0.3423903!4d-78.4017385!16s%2Fg%2F11hf8477wj?entry=tts',
+      rsvpDeadline: '30 de junio de 2026',
       usingSupabase: Boolean(
         (process.env.NUXT_SUPABASE_URL ?? process.env.SUPABASE_URL)
         && (
