@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { defineAsyncComponent, nextTick } from 'vue'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const route = useRoute()
 const config = useRuntimeConfig()
@@ -11,6 +15,8 @@ const { invitation, pending, error, isSaving, submitError, submitSuccess, submit
 
 const showOpeningAnimation = ref(false)
 const hasPlayedOpeningAnimation = ref(false)
+const hasAnimatedCards = ref(false)
+const detailsCardRef = ref<HTMLElement | null>(null)
 
 watch(
   invitation,
@@ -30,6 +36,59 @@ watch(
 function handleOpeningAnimationComplete() {
   showOpeningAnimation.value = false
 }
+
+async function animateCardsIn() {
+  if (!import.meta.client || hasAnimatedCards.value) {
+    return
+  }
+
+  await nextTick()
+
+  const cards = [detailsCardRef.value].filter((card): card is HTMLElement => Boolean(card))
+
+  if (!cards.length) {
+    return
+  }
+
+  gsap.killTweensOf(cards)
+  gsap.fromTo(
+    cards,
+    {
+      opacity: 0,
+      y: 34,
+      scale: 0.975,
+    },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.9,
+      stagger: 0.14,
+      ease: 'power3.out',
+      clearProps: 'transform,opacity',
+    },
+  )
+
+  hasAnimatedCards.value = true
+}
+
+watch(
+  [invitation, showOpeningAnimation],
+  async ([currentInvitation, isOpening]) => {
+    if (!currentInvitation) {
+      hasAnimatedCards.value = false
+      return
+    }
+
+    if (isOpening) {
+      hasAnimatedCards.value = false
+      return
+    }
+
+    await animateCardsIn()
+  },
+  { flush: 'post' },
+)
 </script>
 
 <template>
@@ -71,27 +130,29 @@ function handleOpeningAnimationComplete() {
           No encontramos este enlace
         </h1>
         <p class="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-          Revisa el nombre nuevamente desde la pantalla inicial o conecta esta ruta a Supabase para trabajar con tus invitados reales.
+          Este enlace no corresponde a ninguna invitacion activa. Por favor verifica que hayas ingresado tu nombre correctamente o contacta a los novios.
         </p>
       </div>
 
-      <div
-        v-else
-        class="mt-8 flex flex-col gap-6 transition duration-700 ease-out"
-        :class="showOpeningAnimation ? 'translate-y-10 opacity-0' : 'translate-y-0 opacity-100'"
-      >
-        <InvitationDetailsCard
-          :invitation="invitation"
-          :rsvp-deadline="config.public.rsvpDeadline"
-        />
+      <div v-else-if="!showOpeningAnimation" class="mt-8 flex flex-col gap-6">
+        <div
+          ref="detailsCardRef"
+        >
+          <InvitationDetailsCard
+            :invitation="invitation"
+            :rsvp-deadline="config.public.rsvpDeadline"
+          />
+        </div>
 
-        <InvitationRsvpCard
-          :invitation="invitation"
-          :is-saving="isSaving"
-          :submit-error="submitError"
-          :submit-success="submitSuccess"
-          @submit="submitRsvp"
-        />
+        <div>
+          <InvitationRsvpCard
+            :invitation="invitation"
+            :is-saving="isSaving"
+            :submit-error="submitError"
+            :submit-success="submitSuccess"
+            @submit="submitRsvp"
+          />
+        </div>
       </div>
     </div>
   </main>

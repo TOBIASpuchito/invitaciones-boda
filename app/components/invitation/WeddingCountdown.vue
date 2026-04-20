@@ -108,6 +108,7 @@ function pad(n: number) {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  width: 100%;
 }
 
 /* ── unit ──────────────────────────────────────────────────── */
@@ -116,6 +117,7 @@ function pad(n: number) {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
   animation: unitIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--i) * 80ms);
 }
@@ -128,6 +130,7 @@ function pad(n: number) {
 /* ── box ───────────────────────────────────────────────────── */
 .countdown-box {
   position: relative;
+  width: 100%;
   min-width: 3.6rem;
   padding: 0.7rem 0.5rem;
   border-radius: 1rem;
@@ -191,6 +194,31 @@ function pad(n: number) {
   font-family: var(--font-display, Georgia, serif);
   font-size: 1.2rem;
   color: #4a2830;
+}
+
+@media (max-width: 520px) {
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem 0.5rem;
+    align-items: start;
+  }
+
+  .countdown-sep {
+    display: none;
+  }
+
+  .countdown-box {
+    min-width: 0;
+  }
+
+  .countdown-num {
+    font-size: clamp(1.25rem, 5vw, 1.55rem);
+  }
+
+  .countdown-label {
+    letter-spacing: 0.16em;
+  }
 }
 
 @media (max-width: 380px) {

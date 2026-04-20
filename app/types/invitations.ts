@@ -46,3 +46,13 @@ export interface AdminCreateInvitationPayload {
   allowedGuests: number
   notes?: string
 }
+
+export interface AdminImportInvitationsPayload {
+  invitations: AdminCreateInvitationPayload[]
+}
+
+export interface AdminImportInvitationsResult {
+  invitations: AdminInvitation[]
+  createdCount: number
+  message: string
+}

@@ -50,9 +50,7 @@ const { guestName, isSearching, error: searchError, search: searchInvitations } 
               {{ searchError }}
             </p>
 
-            <p v-if="!config.public.usingSupabase" class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Configuracion incompleta. Debes conectar Supabase o Postgres para poder buscar invitaciones reales.
-            </p>
+
           </form>
         </div>
       </div>
@@ -60,7 +58,7 @@ const { guestName, isSearching, error: searchError, search: searchInvitations } 
       <div class="mt-12 w-full max-w-xl lg:mt-0">
         <div class="rounded-[2rem] border border-white/70 bg-white/75 p-8 shadow-glow backdrop-blur">
           <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
-            Vista base del MVP
+            Los detalles de la boda
           </p>
 
           <div class="mt-8 grid gap-4 sm:grid-cols-2">

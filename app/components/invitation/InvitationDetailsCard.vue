@@ -1,39 +1,44 @@
 <script setup lang="ts">
 import type { InvitationDetail } from '~/types/invitations'
+import { useInvitationScrollReveal } from '~/composables/useInvitationScrollReveal'
 
 defineProps<{
   invitation: InvitationDetail
   rsvpDeadline: string
 }>()
+
+const sectionRef = ref<HTMLElement | null>(null)
+
+useInvitationScrollReveal(sectionRef)
 </script>
 
 <template>
-  <section class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-glow backdrop-blur">
-    <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
+  <section ref="sectionRef" class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-glow backdrop-blur">
+    <p data-reveal data-reveal-delay="0" class="text-sm uppercase tracking-[0.35em] text-wine/70">
       Tu invitacion
     </p>
 
-    <h1 class="mt-5 font-display text-4xl leading-tight text-cocoa sm:text-5xl">
+    <h1 data-reveal data-reveal-delay="0.04" class="mt-5 font-display text-4xl leading-tight text-cocoa sm:text-5xl">
       {{ invitation.displayName }}
     </h1>
 
-    <p class="mt-4 text-lg leading-8 text-stone-600">
-      Nos encantaria celebrar contigo este momento tan importante. Esta pagina representa la invitacion unica para tu registro.
+    <p data-reveal data-reveal-delay="0.08" class="mt-4 text-lg leading-8 text-stone-600">
+      Cindy y Marcelo tienen el honor de invitarte a celebrar el dia mas especial de sus vidas. Esta pagina es tu invitacion personal.
     </p>
 
-    <blockquote class="mt-6 border-l-2 border-wine/30 pl-5 space-y-2">
-      <p class="text-sm leading-7 text-stone-500 italic">Hace 12 años el destino nos unió&hellip;</p>
-      <p class="text-sm leading-7 text-stone-500 italic">y desde entonces, no hemos dejado de elegirnos.</p>
-      <p class="text-sm leading-7 text-stone-500 italic">Construimos una familia, un hogar y un amor que nos transformó.</p>
-      <p class="text-sm leading-7 text-stone-500 italic">Y ahora, damos un paso más: unir nuestras vidas para siempre.</p>
-      <p class="text-sm leading-7 text-stone-500 italic">Este no es solo nuestro día, es la celebración de una historia que sigue creciendo.</p>
+    <blockquote data-reveal data-reveal-delay="0.12" class="mt-6 border-l-2 border-wine/30 pl-5 space-y-2">
+      <p class="text-sm leading-7 text-stone-500 italic">Hace 12 años el destino unió a Cindy y Marcelo&hellip;</p>
+      <p class="text-sm leading-7 text-stone-500 italic">y desde entonces, no han dejado de elegirse el uno al otro.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Construyeron juntos una familia, un hogar y un amor que los transformó.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Y ahora, dan el paso definitivo: unir sus vidas para siempre.</p>
+      <p class="text-sm leading-7 text-stone-500 italic">Este no es solo su día, es la celebración de una historia que sigue creciendo.</p>
     </blockquote>
 
-    <div class="mt-8 rounded-[1.75rem] border border-white/70 bg-white/60 px-6 py-5 shadow-sm backdrop-blur">
+    <div data-reveal class="mt-8 rounded-[1.75rem] border border-white/70 bg-white/60 px-6 py-5 shadow-sm backdrop-blur">
       <InvitationWeddingCountdown />
     </div>
 
-    <div class="mt-8 flex flex-wrap gap-3">
+    <div data-reveal class="mt-8 flex flex-wrap gap-3">
       <span class="rounded-full bg-sand px-4 py-2 text-sm font-medium text-cocoa">
         {{ invitation.relationship }}
       </span>
@@ -45,7 +50,7 @@ defineProps<{
       </span>
     </div>
 
-    <div class="mt-8 rounded-[1.75rem] bg-sand p-6">
+    <div data-reveal class="mt-8 rounded-[1.75rem] bg-sand p-6">
       <p class="text-xs uppercase tracking-[0.28em] text-stone-500">
         Invitados registrados
       </p>
@@ -69,7 +74,7 @@ defineProps<{
     <div class="detail-widgets mt-6 grid gap-4 sm:grid-cols-2">
 
       <!-- Fecha -->
-      <div class="widget widget--date" style="--delay: 0ms">
+      <div data-reveal data-reveal-delay="0" class="widget widget--date">
         <div class="widget-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="3" />
@@ -84,7 +89,7 @@ defineProps<{
       </div>
 
       <!-- Hora -->
-      <div class="widget widget--time" style="--delay: 80ms">
+      <div data-reveal data-reveal-delay="0.08" class="widget widget--time">
         <div class="widget-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9" />
@@ -97,7 +102,7 @@ defineProps<{
       </div>
 
       <!-- Lugar -->
-      <div class="widget widget--venue sm:col-span-2" style="--delay: 160ms">
+      <div data-reveal data-reveal-delay="0.16" class="widget widget--venue sm:col-span-2">
         <div class="widget-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
@@ -123,7 +128,9 @@ defineProps<{
 
     </div>
 
-    <InvitationGiftSection />
+    <div data-reveal>
+      <InvitationGiftSection />
+    </div>
   </section>
 </template>
 
@@ -136,11 +143,10 @@ defineProps<{
   border: 1px solid rgba(222, 195, 193, 0.55);
   background: linear-gradient(145deg, #ffffff 0%, #fdf6f4 100%);
   padding: 1.5rem;
+  will-change: transform, opacity;
   box-shadow:
     0 2px 12px rgba(120, 60, 70, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.04);
-  animation: widgetIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: var(--delay, 0ms);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -149,11 +155,6 @@ defineProps<{
   box-shadow:
     0 8px 28px rgba(120, 60, 70, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-@keyframes widgetIn {
-  from { opacity: 0; transform: translateY(18px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 /* ── decorative animated ring in corner ──────────────────── */

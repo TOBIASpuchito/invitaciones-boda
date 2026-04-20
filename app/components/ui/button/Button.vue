@@ -36,7 +36,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <button :class="cn(buttonVariants({ variant, size }), props.class)">
+  <button v-bind="$attrs" :class="cn(buttonVariants({ variant, size }), props.class)">
     <slot />
   </button>
 </template>

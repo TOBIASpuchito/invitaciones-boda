@@ -54,6 +54,88 @@ export interface AdminCreateInvitationPayload {
   notes?: string
 }
 
+async function createSingleAdminInvitation(
+  payload: AdminCreateInvitationPayload,
+  database: ReturnType<typeof getSupabaseDatabasePool>,
+  client: ReturnType<typeof getSupabaseAdminClient>,
+) {
+  const searchName = buildInvitationSearchName(payload.displayName, payload.relationship, payload.namedGuests)
+  const notes = payload.notes?.trim() || null
+
+  if (database) {
+    const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
+      const { rows } = await database.query<{ id: string }>(
+        `select id from public.invitations where token = $1 limit 1`,
+        [candidateToken],
+      )
+
+      return Boolean(rows[0])
+    })
+
+    const { rows } = await database.query<SupabaseInvitationRow>(
+      `
+        insert into public.invitations (
+          token,
+          display_name,
+          named_guests,
+          relationship,
+          allowed_guests,
+          notes,
+          search_name,
+          status,
+          confirmed_count
+        )
+        values ($1, $2, $3::text[], $4, $5, $6, $7, 'pending', null)
+        returning id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at
+      `,
+      [token, payload.displayName, payload.namedGuests, payload.relationship, payload.allowedGuests, notes, searchName],
+    )
+
+    if (!rows[0]) {
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+    }
+
+    return mapAdminInvitation(rows[0], null)
+  }
+
+  const supabaseClient = requireSupabaseAdminClient(client)
+  const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
+    const { data, error } = await supabaseClient
+      .from('invitations')
+      .select('id')
+      .eq('token', candidateToken)
+      .maybeSingle()
+
+    if (error) {
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo validar el token de la invitacion.' })
+    }
+
+    return Boolean(data)
+  })
+
+  const { data, error } = await supabaseClient
+    .from('invitations')
+    .insert({
+      token,
+      display_name: payload.displayName,
+      named_guests: payload.namedGuests,
+      relationship: payload.relationship,
+      allowed_guests: payload.allowedGuests,
+      notes,
+      search_name: searchName,
+      status: 'pending',
+      confirmed_count: null,
+    })
+    .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
+    .single()
+
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+  }
+
+  return mapAdminInvitation(data as SupabaseInvitationRow, null)
+}
+
 interface SupabaseInvitationRow {
   id: string
   token: string
@@ -467,83 +549,25 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
 export async function createAdminInvitation(payload: AdminCreateInvitationPayload) {
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
-  const searchName = buildInvitationSearchName(payload.displayName, payload.relationship, payload.namedGuests)
-  const notes = payload.notes?.trim() || null
 
   assertDataAccessConfigured(database, client)
 
-  if (database) {
-    const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
-      const { rows } = await database.query<{ id: string }>(
-        `select id from public.invitations where token = $1 limit 1`,
-        [candidateToken],
-      )
+  return createSingleAdminInvitation(payload, database, client)
+}
 
-      return Boolean(rows[0])
-    })
+export async function importAdminInvitations(payloads: AdminCreateInvitationPayload[]) {
+  const database = getSupabaseDatabasePool()
+  const client = getSupabaseAdminClient()
 
-    const { rows } = await database.query<SupabaseInvitationRow>(
-      `
-        insert into public.invitations (
-          token,
-          display_name,
-          named_guests,
-          relationship,
-          allowed_guests,
-          notes,
-          search_name,
-          status,
-          confirmed_count
-        )
-        values ($1, $2, $3::text[], $4, $5, $6, $7, 'pending', null)
-        returning id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at
-      `,
-      [token, payload.displayName, payload.namedGuests, payload.relationship, payload.allowedGuests, notes, searchName],
-    )
+  assertDataAccessConfigured(database, client)
 
-    if (!rows[0]) {
-      throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
-    }
+  const invitations: AdminInvitation[] = []
 
-    return mapAdminInvitation(rows[0], null)
+  for (const payload of payloads) {
+    invitations.push(await createSingleAdminInvitation(payload, database, client))
   }
 
-  const supabaseClient = requireSupabaseAdminClient(client)
-  const token = await generateUniqueToken(payload.displayName, async (candidateToken) => {
-    const { data, error } = await supabaseClient
-      .from('invitations')
-      .select('id')
-      .eq('token', candidateToken)
-      .maybeSingle()
-
-    if (error) {
-      throw createError({ statusCode: 500, statusMessage: 'No se pudo validar el token de la invitacion.' })
-    }
-
-    return Boolean(data)
-  })
-
-  const { data, error } = await supabaseClient
-    .from('invitations')
-    .insert({
-      token,
-      display_name: payload.displayName,
-      named_guests: payload.namedGuests,
-      relationship: payload.relationship,
-      allowed_guests: payload.allowedGuests,
-      notes,
-      search_name: searchName,
-      status: 'pending',
-      confirmed_count: null,
-    })
-    .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
-    .single()
-
-  if (error) {
-    throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
-  }
-
-  return mapAdminInvitation(data as SupabaseInvitationRow, null)
+  return invitations
 }
 
 export async function deleteAdminInvitation(id: string) {
@@ -576,13 +600,29 @@ export async function deleteAdminInvitation(id: string) {
   return Boolean(data)
 }
 
-export async function listAdminInvitations() {
+export async function listAdminInvitations(filters?: { query?: string; status?: InvitationStatus | 'all' }) {
   const database = getSupabaseDatabasePool()
   const client = getSupabaseAdminClient()
+  const normalizedQuery = normalizeText(filters?.query ?? '')
+  const hasQuery = Boolean(normalizedQuery)
+  const statusFilter = filters?.status && filters.status !== 'all' ? filters.status : null
 
   assertDataAccessConfigured(database, client)
 
   if (database) {
+    const whereClauses = ['1 = 1']
+    const queryParams: Array<string> = []
+
+    if (hasQuery) {
+      queryParams.push(`%${normalizedQuery}%`)
+      whereClauses.push(`i.search_name like $${queryParams.length}`)
+    }
+
+    if (statusFilter) {
+      queryParams.push(statusFilter)
+      whereClauses.push(`i.status = $${queryParams.length}`)
+    }
+
     const { rows } = await database.query<DatabaseInvitationRow>(
       `
         select
@@ -612,8 +652,10 @@ export async function listAdminInvitations() {
           order by submitted_at desc
           limit 1
         ) r on true
+        where ${whereClauses.join(' and ')}
         order by i.display_name asc
       `,
+      queryParams,
     )
 
     return rows.map(mapDatabaseInvitation)
@@ -621,18 +663,39 @@ export async function listAdminInvitations() {
 
   const supabaseClient = requireSupabaseAdminClient(client)
 
-  const [{ data: invitationsData, error: invitationsError }, { data: rsvpsData, error: rsvpsError }] = await Promise.all([
-    supabaseClient
-      .from('invitations')
-      .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
-      .order('display_name', { ascending: true }),
-    supabaseClient
-      .from('rsvps')
-      .select('invitation_id, attendance, confirmed_count, phone, message, guest_names, submitted_at')
-      .order('submitted_at', { ascending: false }),
-  ])
+  let invitationsQuery = supabaseClient
+    .from('invitations')
+    .select('id, token, display_name, named_guests, relationship, allowed_guests, notes, status, confirmed_count, search_name, created_at, updated_at')
+    .order('display_name', { ascending: true })
 
-  if (invitationsError || rsvpsError) {
+  if (hasQuery) {
+    invitationsQuery = invitationsQuery.ilike('search_name', `%${normalizedQuery}%`)
+  }
+
+  if (statusFilter) {
+    invitationsQuery = invitationsQuery.eq('status', statusFilter)
+  }
+
+  const { data: invitationsData, error: invitationsError } = await invitationsQuery
+
+  if (invitationsError) {
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo consultar el panel de invitados.' })
+  }
+
+  const invitationRows = (invitationsData ?? []) as SupabaseInvitationRow[]
+
+  if (!invitationRows.length) {
+    return []
+  }
+
+  const invitationIds = invitationRows.map((row) => row.id)
+  const { data: rsvpsData, error: rsvpsError } = await supabaseClient
+    .from('rsvps')
+    .select('invitation_id, attendance, confirmed_count, phone, message, guest_names, submitted_at')
+    .in('invitation_id', invitationIds)
+    .order('submitted_at', { ascending: false })
+
+  if (rsvpsError) {
     throw createError({ statusCode: 500, statusMessage: 'No se pudo consultar el panel de invitados.' })
   }
 
@@ -644,5 +707,5 @@ export async function listAdminInvitations() {
     }
   }
 
-  return ((invitationsData ?? []) as SupabaseInvitationRow[]).map((row) => mapAdminInvitation(row, latestRsvps.get(row.id) ?? null))
+  return invitationRows.map((row) => mapAdminInvitation(row, latestRsvps.get(row.id) ?? null))
 }
