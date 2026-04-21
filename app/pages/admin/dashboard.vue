@@ -234,7 +234,14 @@ async function handleImportFileChange(event: Event) {
   try {
     const buffer = await file.arrayBuffer()
     const workbook = XLSX.read(buffer, { type: 'array' })
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+    const firstSheetName = workbook.SheetNames[0]
+
+    if (!firstSheetName) {
+      importError.value = 'El archivo no contiene una hoja valida.'
+      return
+    }
+
+    const firstSheet = workbook.Sheets[firstSheetName]
 
     if (!firstSheet) {
       importError.value = 'El archivo no contiene una hoja valida.'
@@ -270,15 +277,17 @@ async function handleImportFileChange(event: Event) {
           ? parseNamedGuests(namedGuestsRaw, displayName)
           : splitNamedGuests(displayName, allowedGuests)
 
-        return {
+        const invitationPayload: AdminCreateInvitationPayload = {
           displayName,
           namedGuests,
           relationship,
           allowedGuests,
           notes: notes || undefined,
         }
+
+        return invitationPayload
       })
-      .filter((row): row is AdminCreateInvitationPayload => Boolean(row))
+      .filter((row): row is AdminCreateInvitationPayload => row !== null)
 
     if (!parsedRows.length) {
       importError.value = 'No se encontraron invitados validos en el archivo.'
