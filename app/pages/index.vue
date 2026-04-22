@@ -10,7 +10,7 @@ const { guestName, isSearching, error: searchError, search: searchInvitations } 
     <section class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16 lg:flex-row lg:items-center lg:gap-16">
       <div class="max-w-2xl">
         <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
-          Invitacion digital
+          Invitacion digital lol
         </p>
 
         <h1 class="mt-5 font-display text-5xl leading-tight text-cocoa sm:text-6xl">
