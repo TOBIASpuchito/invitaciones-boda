@@ -1,0 +1,13 @@
+.git
+.github
+.nuxt
+.output
+node_modules
+dist
+.env
+.env.*
+!.env.example
+npm-debug.log*
+bun-debug.log*
+Dockerfile*
+README.md

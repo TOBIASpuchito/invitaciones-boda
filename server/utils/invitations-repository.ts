@@ -345,12 +345,12 @@ export async function searchInvitations(query: string) {
     )
 
     return rows
-      .sort((left, right) => {
+      .sort((left: SupabaseInvitationRow, right: SupabaseInvitationRow) => {
         const scoreDiff = scoreInvitation(left.display_name, left.named_guests, normalizedQuery) - scoreInvitation(right.display_name, right.named_guests, normalizedQuery)
 
         return scoreDiff || left.display_name.localeCompare(right.display_name)
       })
-      .map((row) => ({
+      .map((row: SupabaseInvitationRow) => ({
         token: row.token,
         displayName: row.display_name,
         relationship: row.relationship,

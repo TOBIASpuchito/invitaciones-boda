@@ -62,6 +62,23 @@ Si faltan credenciales de `Supabase` o `Postgres`, la app falla de forma explici
 
 Servidor local en `http://localhost:3000`.
 
+## Despliegue con Dockploy
+
+El repositorio queda listo para desplegarse desde `Dockerfile`.
+
+Pasos recomendados en Dockploy:
+
+1. Crear un servicio tipo `Dockerfile` apuntando a este repositorio.
+2. Usar el puerto interno `3000`.
+3. Cargar las variables del archivo `.env.example` y completar al menos:
+	- `NUXT_SUPABASE_URL`
+	- `NUXT_SUPABASE_KEY`
+	- `NUXT_SUPABASE_SERVICE_ROLE_KEY` o `NUXT_SUPABASE_DB_PASSWORD`
+	- `NUXT_ADMIN_PASSWORD`
+4. Si la instancia de Supabase es nueva, ejecutar antes el esquema de `supabase/schema.sql`.
+
+La imagen compila la app con `bun` y ejecuta Nitro en producción con `node` sobre `0.0.0.0:3000`.
+
 ## Estructura clave
 
 - `app/pages/index.vue`: pantalla de busqueda

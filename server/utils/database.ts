@@ -7,6 +7,12 @@ let cachedConnectionString = ''
 function buildDatabaseConnectionString(supabaseUrl: string, databasePassword: string) {
   try {
     const hostname = new URL(supabaseUrl).hostname
+
+    // Solo construir la conexión directa para proyectos alojados en supabase.co
+    if (!hostname.endsWith('.supabase.co')) {
+      return null
+    }
+
     const projectRef = hostname.split('.')[0]
 
     if (!projectRef) {
