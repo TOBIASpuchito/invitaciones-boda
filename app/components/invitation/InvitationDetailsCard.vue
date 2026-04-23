@@ -14,7 +14,7 @@ const heroNames = computed(() =>
   props.eventName.replace(/^Boda de\s+/i, "").trim(),
 );
 
-const heroTagline = "Una promesa, una fiesta y un para siempre.";
+const heroTagline = "¡Nos casamos!";
 
 const monthMap: Record<string, string> = {
   enero: "01", febrero: "02", marzo: "03", abril: "04",
