@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
+const { prepareInvitationMusic, stopInvitationMusic } = useInvitationMusic()
 const { guestName, isSearching, error: searchError, search: searchInvitations } = useInvitationSearch()
+
+onMounted(() => {
+  stopInvitationMusic()
+  prepareInvitationMusic()
+})
 </script>
 
 <template>

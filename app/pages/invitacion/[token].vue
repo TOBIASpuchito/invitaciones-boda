@@ -12,79 +12,12 @@ const token = route.params.token as string
 const InvitationLetterOpeningAnimation = defineAsyncComponent(() => import('~/components/invitation/LetterOpeningAnimation.vue'))
 
 const { invitation, pending, error, isSaving, submitError, submitSuccess, submit: submitRsvp } = await useInvitation(token)
+const { startInvitationMusic, queueInvitationMusicUnlock } = useInvitationMusic()
 
 const showOpeningAnimation = ref(false)
 const hasPlayedOpeningAnimation = ref(false)
 const hasAnimatedCards = ref(false)
 const detailsCardRef = ref<HTMLElement | null>(null)
-const backgroundAudioRef = ref<HTMLAudioElement | null>(null)
-const hasStartedBackgroundAudio = ref(false)
-let removeAudioUnlockListener: (() => void) | null = null
-
-function cleanupAudioUnlockListener() {
-  removeAudioUnlockListener?.()
-  removeAudioUnlockListener = null
-}
-
-async function playBackgroundAudio() {
-  if (!import.meta.client || hasStartedBackgroundAudio.value) {
-    return
-  }
-
-  const audio = backgroundAudioRef.value
-
-  if (!audio) {
-    return
-  }
-
-  const startPlayback = async () => {
-    audio.currentTime = 10
-    audio.volume = 1
-    await audio.play()
-    hasStartedBackgroundAudio.value = true
-    cleanupAudioUnlockListener()
-  }
-
-  try {
-    if (audio.readyState >= 1) {
-      await startPlayback()
-      return
-    }
-
-    await new Promise<void>((resolve) => {
-      const handleLoadedMetadata = () => {
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
-        resolve()
-      }
-
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true })
-      audio.load()
-    })
-
-    await startPlayback()
-  } catch {
-    if (removeAudioUnlockListener) {
-      return
-    }
-
-    const tryUnlockAudio = async () => {
-      try {
-        await startPlayback()
-      } catch {
-        return
-      }
-    }
-
-    const options: AddEventListenerOptions = { once: true, passive: true }
-    window.addEventListener('pointerdown', tryUnlockAudio, options)
-    window.addEventListener('keydown', tryUnlockAudio, options)
-
-    removeAudioUnlockListener = () => {
-      window.removeEventListener('pointerdown', tryUnlockAudio)
-      window.removeEventListener('keydown', tryUnlockAudio)
-    }
-  }
-}
 
 watch(
   invitation,
@@ -96,7 +29,12 @@ watch(
     if (import.meta.client && !hasPlayedOpeningAnimation.value) {
       hasPlayedOpeningAnimation.value = true
       showOpeningAnimation.value = true
-      void playBackgroundAudio()
+
+      void startInvitationMusic().then((hasStarted) => {
+        if (!hasStarted) {
+          queueInvitationMusicUnlock()
+        }
+      })
     }
   },
   { immediate: true },
@@ -158,21 +96,10 @@ watch(
   },
   { flush: 'post' },
 )
-
-onBeforeUnmount(() => {
-  cleanupAudioUnlockListener()
-  backgroundAudioRef.value?.pause()
-})
 </script>
 
 <template>
   <main class="relative min-h-screen px-6 py-10 sm:py-14">
-    <audio
-      ref="backgroundAudioRef"
-      preload="auto"
-      src="/A Sky Full of Stars.mp3"
-    />
-
     <InvitationFloralDecoration />
     <InvitationLetterOpeningAnimation
       v-if="invitation && showOpeningAnimation"
