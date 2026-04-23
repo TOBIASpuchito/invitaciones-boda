@@ -8,7 +8,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   complete: []
-  musicChoice: [withMusic: boolean]
 }>()
 
 const started = ref(false)
@@ -35,7 +34,6 @@ function showEnvelope() {
 
 function choose(withMusic: boolean) {
   started.value = true
-  emit('musicChoice', withMusic)
   buildTimeline()
 }
 
@@ -114,6 +112,7 @@ onMounted(() => {
   gsap.set(coverRef.value, { display: 'none' })
 
   showEnvelope()
+  choose(true)
 })
 
 onBeforeUnmount(() => {
@@ -151,19 +150,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <Transition name="choices-fade">
-      <div v-if="!started" class="anim-choices">
-        <p class="anim-choices-label">¿Cómo quieres abrir tu carta?</p>
-        <div class="anim-choices-btns">
-          <button class="anim-btn anim-btn--music" @click="choose(true)">
-            <span class="anim-btn-icon">♪</span> Con música
-          </button>
-          <button class="anim-btn" @click="choose(false)">
-            Sin música
-          </button>
-        </div>
-      </div>
-    </Transition>
     </div>
 
     <div ref="coverRef" class="anim-cover" />
@@ -350,71 +336,5 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-}
-
-.anim-choices {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  z-index: 10;
-}
-
-.anim-choices-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(60, 30, 40, 0.55);
-}
-
-.anim-choices-btns {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.anim-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.65rem 1.4rem;
-  border-radius: 9999px;
-  border: 1.5px solid rgba(100, 40, 60, 0.25);
-  background: #ffffff;
-  color: rgba(60, 30, 40, 0.75);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-}
-
-.anim-btn:hover {
-  border-color: rgba(100, 40, 60, 0.55);
-  color: rgba(60, 20, 30, 1);
-  transform: translateY(-1px);
-}
-
-.anim-btn--music {
-  background: rgba(100, 40, 60, 0.06);
-}
-
-.anim-btn-icon {
-  font-style: normal;
-}
-
-.choices-fade-enter-active,
-.choices-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.choices-fade-enter-from,
-.choices-fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
 }
 </style>

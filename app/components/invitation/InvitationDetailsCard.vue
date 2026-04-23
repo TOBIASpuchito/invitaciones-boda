@@ -1,11 +1,32 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { InvitationDetail } from "~/types/invitations";
 import { useInvitationScrollReveal } from "~/composables/useInvitationScrollReveal";
 
-defineProps<{
+const props = defineProps<{
   invitation: InvitationDetail;
   rsvpDeadline: string;
+  eventName: string;
+  eventDate: string;
 }>();
+
+const heroNames = computed(() =>
+  props.eventName.replace(/^Boda de\s+/i, "").trim(),
+);
+
+const heroTagline = "Una promesa, una fiesta y un para siempre.";
+
+const monthMap: Record<string, string> = {
+  enero: "01", febrero: "02", marzo: "03", abril: "04",
+  mayo: "05", junio: "06", julio: "07", agosto: "08",
+  septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12",
+};
+
+const heroDateNumeric = computed(() => {
+  const m = props.eventDate.toLowerCase().match(/(\d+)\s+de\s+(\w+)\s+de\s+(\d+)/);
+  if (!m || !m[1] || !m[2] || !m[3]) return props.eventDate;
+  return `${m[1].padStart(2, "0")} · ${monthMap[m[2]] ?? "??"} · ${m[3]}`;
+});
 
 const sectionRef = ref<HTMLElement | null>(null);
 
@@ -43,17 +64,38 @@ useInvitationScrollReveal(sectionRef);
     </p>
 
     <!-- Foto de portada -->
-    <div data-reveal class="photo-hero mt-8">
-      <img
-        src="/FotoPortada.webp"
-        alt="Cindy y Marcelo"
-        class="photo-hero__img"
-        loading="lazy"
-        decoding="async"
-      />
-      <div class="photo-hero__overlay">
-        <p class="photo-hero__caption">Cindy &amp; Marcelo</p>
+    <div data-reveal class="photo-frame mt-8">
+
+      <!-- Marco superior -->
+      <div class="photo-frame__header">
+        <p class="photo-frame__eyebrow">Nuestra boda</p>
+        <p class="photo-frame__names">{{ heroNames }}</p>
       </div>
+
+      <!-- Foto limpia -->
+      <div class="photo-frame__img-wrap">
+        <img
+          src="/FotoPortada.webp"
+          alt="Cindy y Marcelo"
+          class="photo-frame__img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <!-- Marco inferior -->
+      <div class="photo-frame__footer">
+        <div class="photo-frame__sep" aria-hidden="true">
+          <span class="photo-frame__sep-line" />
+          <svg class="photo-frame__sep-gem" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 1L9.8 6.2H15.3L10.9 9.5L12.7 14.7L8 11.4L3.3 14.7L5.1 9.5L0.7 6.2H6.2L8 1Z" />
+          </svg>
+          <span class="photo-frame__sep-line" />
+        </div>
+        <p class="photo-frame__date">{{ heroDateNumeric }}</p>
+        <p class="photo-frame__tagline">{{ heroTagline }}</p>
+      </div>
+
     </div>
     <blockquote
       data-reveal
@@ -220,6 +262,8 @@ useInvitationScrollReveal(sectionRef);
       </div>
     </div>
 
+    <InvitationDressCodeCard />
+
     <div data-reveal>
       <InvitationGiftSection />
     </div>
@@ -227,49 +271,117 @@ useInvitationScrollReveal(sectionRef);
 </template>
 
 <style scoped>
-/* ── photo hero ───────────────────────────────────────────── */
-.photo-hero {
-  position: relative;
+/* ── photo frame ──────────────────────────────────────────── */
+.photo-frame {
   border-radius: 1.75rem;
   overflow: hidden;
+  border: 1px solid rgba(222, 195, 193, 0.5);
   box-shadow:
-    0 4px 24px rgba(120, 60, 70, 0.14),
-    0 1px 4px rgba(0, 0, 0, 0.06);
+    0 4px 24px rgba(120, 60, 70, 0.13),
+    0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-.photo-hero__img {
+/* ── top header ───────────────────────────────────────────── */
+.photo-frame__header {
+  text-align: center;
+  padding: 1.4rem 1.75rem 1.25rem;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(109, 70, 84, 0.1) 0%, transparent 58%),
+    linear-gradient(175deg, #fff 0%, #fdf5f2 100%);
+  border-bottom: 1px solid rgba(222, 195, 193, 0.38);
+}
+
+.photo-frame__eyebrow {
+  font-size: 0.56rem;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(109, 70, 84, 0.5);
+}
+
+.photo-frame__names {
+  margin-top: 0.4rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  line-height: 1;
+  color: #3d2328;
+  letter-spacing: 0.02em;
+}
+
+/* ── photo itself ─────────────────────────────────────────── */
+.photo-frame__img-wrap {
+  overflow: hidden;
+  line-height: 0;
+}
+
+.photo-frame__img {
   width: 100%;
   height: auto;
+  min-height: 22rem;
+  object-fit: cover;
   display: block;
-  transition: transform 0.6s ease;
+  transition: transform 0.65s ease;
 }
 
-.photo-hero:hover .photo-hero__img {
+.photo-frame:hover .photo-frame__img {
   transform: scale(1.03);
 }
 
-.photo-hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(74, 40, 48, 0.55) 0%,
-    rgba(74, 40, 48, 0.08) 45%,
-    transparent 100%
-  );
-  display: flex;
-  align-items: flex-end;
-  padding: 1.5rem 1.75rem;
-  pointer-events: none;
+/* ── bottom footer ────────────────────────────────────────── */
+.photo-frame__footer {
+  text-align: center;
+  padding: 1.1rem 1.75rem 1.4rem;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(109, 70, 84, 0.08) 0%, transparent 58%),
+    linear-gradient(5deg, #fdf5f2 0%, #fff 100%);
+  border-top: 1px solid rgba(222, 195, 193, 0.38);
 }
 
-.photo-hero__caption {
-  font-family: var(--font-display, Georgia, serif);
-  font-size: 1.5rem;
-  line-height: 1;
-  color: #ffffff;
-  letter-spacing: 0.06em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+.photo-frame__sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin: 0 auto 0.7rem;
+  max-width: 12rem;
+  color: rgba(180, 110, 110, 0.4);
+}
+
+.photo-frame__sep-line {
+  flex: 1;
+  display: block;
+  height: 1px;
+  background: rgba(180, 110, 110, 0.22);
+}
+
+.photo-frame__sep-gem {
+  width: 0.44rem;
+  height: 0.44rem;
+  flex-shrink: 0;
+}
+
+.photo-frame__date {
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  color: rgba(109, 70, 84, 0.75);
+  font-variant-numeric: tabular-nums;
+}
+
+.photo-frame__tagline {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.65;
+  color: rgba(100, 70, 68, 0.42);
+}
+
+@media (max-width: 640px) {
+  .photo-frame__img {
+    min-height: 18rem;
+  }
+
+  .photo-frame__names {
+    font-size: 1.9rem;
+  }
 }
 
 /* ── base widget ──────────────────────────────────────────── */
