@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     supabaseDbPassword: process.env.NUXT_SUPABASE_DB_PASSWORD ?? '',
     adminPassword: process.env.NUXT_ADMIN_PASSWORD ?? '',
     public: {
-      eventName: 'Boda de Cindy & Marcelo',
+      eventName: 'Cindy & Marcelo',
       eventDate: '25 de julio de 2026',
       eventTime: '14h00',
       eventVenue: 'Quinta Boutique Kristal',
