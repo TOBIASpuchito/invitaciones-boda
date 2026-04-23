@@ -118,8 +118,8 @@ function pad(n: number) {
   align-items: center;
   gap: 0.4rem;
   min-width: 0;
-  animation: unitIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i) * 80ms);
+  animation: unitIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(0.8s + var(--i) * 120ms);
 }
 
 @keyframes unitIn {

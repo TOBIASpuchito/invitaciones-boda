@@ -10,13 +10,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="relative min-h-screen overflow-hidden">
+  <main class="relative min-h-screen overflow-hidden text-center">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(222,195,193,0.55),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(169,177,157,0.25),_transparent_32%)]" />
 
     <section class="relative mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16 lg:flex-row lg:items-center lg:gap-16">
       <div class="max-w-2xl">
         <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
-          Invitacion digital
+          Boda de: 
         </p>
 
         <h1 class="mt-5 font-display text-5xl leading-tight text-cocoa sm:text-6xl">

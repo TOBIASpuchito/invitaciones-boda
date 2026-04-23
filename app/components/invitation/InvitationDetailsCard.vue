@@ -49,7 +49,7 @@ useInvitationScrollReveal(sectionRef);
     <h1
       data-reveal
       data-reveal-delay="0.04"
-      class="mt-5 font-display text-4xl leading-tight text-cocoa sm:text-5xl"
+      class="mt-5 font-display text-xl leading-tight text-cocoa sm:text-2xl"
     >
       {{ invitation.displayName }}
     </h1>
@@ -122,12 +122,13 @@ useInvitationScrollReveal(sectionRef);
 
     <div
       data-reveal
+      data-reveal-delay="0.14"
       class="mt-8 rounded-[1.75rem] border border-white/70 bg-white/60 px-6 py-5 shadow-sm backdrop-blur"
     >
       <InvitationWeddingCountdown />
     </div>
 
-    <div data-reveal class="mt-8 flex flex-wrap gap-3">
+    <div data-reveal data-reveal-delay="0.18" class="mt-8 flex flex-wrap justify-center gap-3">
       <span
         class="rounded-full bg-sand px-4 py-2 text-sm font-medium text-cocoa"
       >
@@ -148,12 +149,12 @@ useInvitationScrollReveal(sectionRef);
       </span>
     </div>
 
-    <div data-reveal class="mt-8 rounded-[1.75rem] bg-sand p-6">
+    <div data-reveal data-reveal-delay="0.08" class="mt-8 rounded-[1.75rem] bg-sand p-6">
       <p class="text-xs uppercase tracking-[0.28em] text-stone-500">
         Invitados registrados
       </p>
 
-      <div class="mt-4 flex flex-wrap gap-3">
+      <div class="mt-4 flex flex-wrap justify-center gap-3">
         <span
           v-for="guest in invitation.namedGuests"
           :key="guest"
@@ -264,9 +265,7 @@ useInvitationScrollReveal(sectionRef);
 
     <InvitationDressCodeCard />
 
-    <div data-reveal>
-      <InvitationGiftSection />
-    </div>
+    <InvitationGiftSection />
   </section>
 </template>
 
@@ -452,7 +451,7 @@ useInvitationScrollReveal(sectionRef);
   border-radius: 0.75rem;
   background: rgba(180, 80, 90, 0.08);
   color: rgba(140, 50, 65, 0.8);
-  margin-bottom: 0.85rem;
+  margin: 0 auto 0.85rem;
 }
 
 .widget-icon svg {

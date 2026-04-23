@@ -99,7 +99,7 @@ watch(
 </script>
 
 <template>
-  <main class="relative min-h-screen px-6 py-10 sm:py-14">
+  <main class="relative min-h-screen px-6 py-10 text-center sm:py-14">
     <InvitationFloralDecoration />
     <InvitationLetterOpeningAnimation
       v-if="invitation && showOpeningAnimation"

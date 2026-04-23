@@ -9,7 +9,7 @@ async function copy(text: string, key: 'account' | 'email') {
 </script>
 
 <template>
-  <div class="gift-section">
+  <div data-reveal class="gift-section">
     <!-- Encabezado -->
     <div class="gift-header">
       <div class="gift-icon">
@@ -34,7 +34,6 @@ async function copy(text: string, key: 'account' | 'email') {
 
       <!-- Banco -->
       <div class="gift-bank-header">
-        <span class="gift-bank-logo">B</span>
         <span class="gift-bank-name">Banco Pichincha</span>
       </div>
 
@@ -102,8 +101,9 @@ async function copy(text: string, key: 'account' | 'email') {
 /* ── header ───────────────────────────────────────────── */
 .gift-header {
   display: flex;
-  gap: 0.9rem;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
   margin-bottom: 1.1rem;
 }
 
@@ -117,6 +117,7 @@ async function copy(text: string, key: 'account' | 'email') {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
 }
 
 .gift-icon svg {
@@ -126,6 +127,7 @@ async function copy(text: string, key: 'account' | 'email') {
 
 .gift-header-text {
   min-width: 0;
+  width: 100%;
 }
 
 .gift-eyebrow {
