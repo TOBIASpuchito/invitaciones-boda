@@ -1,6 +1,16 @@
 ﻿<script setup lang="ts">
 import { gsap } from 'gsap'
 
+type LetterPaperExpose = {
+  getAnimationElements: () => {
+    paper: HTMLElement | null
+    sheet: HTMLElement | null
+    eyebrow: HTMLElement | null
+    name: HTMLElement | null
+    event: HTMLElement | null
+  }
+}
+
 const props = defineProps<{
   guestName: string
   eventName: string
@@ -10,34 +20,75 @@ const emit = defineEmits<{
   complete: []
 }>()
 
-const started = ref(false)
-
-const overlayRef = ref<HTMLElement | null>(null)
 const envelopeRef = ref<HTMLElement | null>(null)
 const flapRef = ref<HTMLElement | null>(null)
 const sealRef = ref<HTMLElement | null>(null)
-const paperRef = ref<HTMLElement | null>(null)
-const sheetRef = ref<HTMLElement | null>(null)
-const eyebrowRef = ref<HTMLElement | null>(null)
-const nameRef = ref<HTMLElement | null>(null)
-const eventRef = ref<HTMLElement | null>(null)
+const paperComponentRef = ref<LetterPaperExpose | null>(null)
 const coverRef = ref<HTMLElement | null>(null)
 
 let tl: gsap.core.Timeline | null = null
 
+const flapStyle = {
+  backgroundImage: "url('/tapa.png')",
+  backgroundPosition: 'center top',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'cover',
+}
+
+const sealStyle = {
+  backgroundImage: "url('/sello.png')",
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'contain',
+}
+
+function getPaperElements() {
+  return paperComponentRef.value?.getAnimationElements() ?? {
+    paper: null,
+    sheet: null,
+    eyebrow: null,
+    name: null,
+    event: null,
+  }
+}
+
+async function waitForPaperElements(maxTries = 10) {
+  for (let attempt = 0; attempt < maxTries; attempt += 1) {
+    await nextTick()
+
+    const elements = getPaperElements()
+
+    if (elements.paper && elements.sheet && elements.eyebrow && elements.name && elements.event) {
+      return elements
+    }
+
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  }
+
+  return getPaperElements()
+}
+
 function showEnvelope() {
-  gsap.to(envelopeRef.value, {
-    opacity: 1, y: 0, scale: 1,
-    duration: 0.7, ease: 'back.out(1.4)',
+  return gsap.to(envelopeRef.value, {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.7,
+    ease: 'back.out(1.4)',
   })
 }
 
 function choose(withMusic: boolean) {
-  started.value = true
   buildTimeline()
 }
 
 function buildTimeline() {
+  const { paper, sheet, eyebrow, name, event } = getPaperElements()
+
+  if (!envelopeRef.value || !flapRef.value || !sealRef.value || !paper || !sheet || !eyebrow || !name || !event || !coverRef.value) {
+    return
+  }
+
   tl = gsap.timeline()
 
   tl.to(sealRef.value, {
@@ -46,30 +97,30 @@ function buildTimeline() {
   }, 0)
 
   tl.to(flapRef.value, {
-    rotateX: -180,
+    rotateX: 180,
     duration: 0.85, ease: 'power3.inOut',
   }, 0.15)
 
   // A mitad del giro la solapa pasa al plano trasero del sobre
   tl.set(flapRef.value, { zIndex: 1 }, 0.58)
 
-  tl.to(paperRef.value, {
+  tl.to(paper, {
     y: '-55%',
     duration: 0.85, ease: 'power2.inOut',
   }, 0.9)
 
-  tl.to(paperRef.value, {
+  tl.to(paper, {
     y: '-50%',
     duration: 0.28, ease: 'elastic.out(1, 0.5)',
   }, 1.75)
 
-  tl.to(eyebrowRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 1.6)
-  tl.to(nameRef.value, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }, 1.8)
-  tl.to(eventRef.value, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 2.0)
+  tl.to(eyebrow, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 1.6)
+  tl.to(name, { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.6)' }, 1.8)
+  tl.to(event, { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, 2.0)
 
   tl.call(() => {
-    if (!sheetRef.value || !coverRef.value) return
-    const rect = sheetRef.value.getBoundingClientRect()
+    if (!coverRef.value) return
+    const rect = sheet.getBoundingClientRect()
     gsap.set(coverRef.value, {
       display: 'block',
       opacity: 1,
@@ -97,22 +148,30 @@ function buildTimeline() {
   }, 3.83)
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    emit('complete')
+    return
+  }
+
+  const { paper, eyebrow, name, event } = await waitForPaperElements()
+
+  if (!envelopeRef.value || !flapRef.value || !paper || !eyebrow || !name || !event || !coverRef.value) {
     emit('complete')
     return
   }
 
   gsap.set(envelopeRef.value, { opacity: 0, y: 28, scale: 0.93 })
   gsap.set(flapRef.value, { rotateX: 0, transformOrigin: '50% 0%' })
-  gsap.set(paperRef.value, { y: '85%' })
-  gsap.set(eyebrowRef.value, { opacity: 0, y: 8 })
-  gsap.set(nameRef.value, { opacity: 0, y: 14, scale: 0.94 })
-  gsap.set(eventRef.value, { opacity: 0, y: 8 })
+  gsap.set(paper, { y: '85%' })
+  gsap.set(eyebrow, { opacity: 0, y: 8 })
+  gsap.set(name, { opacity: 0, y: 14, scale: 0.94 })
+  gsap.set(event, { opacity: 0, y: 8 })
   gsap.set(coverRef.value, { display: 'none' })
 
-  showEnvelope()
-  choose(true)
+  showEnvelope().eventCallback('onComplete', () => {
+    choose(true)
+  })
 })
 
 onBeforeUnmount(() => {
@@ -121,220 +180,46 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="overlayRef" class="anim-overlay">
-    <div class="anim-bg" />
+  <div class="fixed inset-0 z-[60] grid place-items-center overflow-hidden bg-[#fcfaf8]">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_20%,rgba(240,240,240,0.4)_0%,transparent_28%)]" />
 
-    <div class="anim-group">
-    <div class="anim-scene">
-      <div ref="envelopeRef" class="env">
+    <div class="flex flex-col items-center">
+      <div class="relative w-[min(84vw,360px)] drop-shadow-[0_16px_26px_rgba(100,75,42,0.2)] sm:w-[min(84vw,380px)]">
+        <div
+          ref="envelopeRef"
+          class="relative aspect-[7/5] rounded-[18px] [perspective:1100px]"
+        >
+          <div class="absolute inset-0 z-[1] rounded-[18px] bg-[#edd9ca] shadow-[0_18px_40px_rgba(132,101,77,0.14)]" />
 
-        <div class="env-back" />
+          <div class="absolute inset-x-0 bottom-0 top-0 z-[2] [clip-path:inset(-999px_0_0_0_round_0_0_18px_18px)]">
+            <InvitationLetterPaper
+              ref="paperComponentRef"
+              :guest-name="props.guestName"
+              :event-name="props.eventName"
+            />
+          </div>
 
-        <div ref="paperRef" class="paper">
-          <div ref="sheetRef" class="paper-sheet">
-            <p ref="eyebrowRef" class="paper-eyebrow">Invitacion para</p>
-            <p ref="nameRef" class="paper-name">{{ props.guestName }}</p>
-            <p ref="eventRef" class="paper-event">{{ props.eventName }}</p>
-            <div class="paper-divider" />
+          <div
+            class="absolute inset-x-0 bottom-0 z-[3] h-[56%] rounded-b-[18px] bg-[#ead6c8] [border-top-left-radius:58%_44%] [border-top-right-radius:58%_44%]"
+          />
+
+          <div
+            ref="flapRef"
+            class="absolute inset-x-0 top-0 z-[4] h-[56%] origin-top [transform-style:preserve-3d]"
+          >
+            <div class="absolute -left-[12%] -right-[12%] -top-[38%] h-[220%]" :style="flapStyle" />
+          </div>
+
+          <div
+            ref="sealRef"
+            class="absolute left-1/2 top-[46%] z-[5] h-[3.75rem] w-[3.75rem] -translate-x-1/2 -translate-y-1/2 sm:h-[4rem] sm:w-[4rem]"
+          >
+            <div class="h-full w-full" :style="sealStyle" />
           </div>
         </div>
-
-        <div class="env-pocket" />
-
-        <div ref="flapRef" class="env-flap" />
-
-        <div ref="sealRef" class="seal">
-          <div class="seal-ring" />
-        </div>
-
       </div>
     </div>
 
-    </div>
-
-    <div ref="coverRef" class="anim-cover" />
+    <div ref="coverRef" class="absolute bg-white" />
   </div>
 </template>
-
-<style scoped>
-.anim-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: #ffffff;
-}
-
-.anim-bg {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 22% 20%, rgba(240, 240, 240, 0.4) 0%, transparent 28%);
-  pointer-events: none;
-}
-
-.anim-scene {
-  position: relative;
-  width: min(84vw, 360px);
-  filter: drop-shadow(0 16px 26px rgba(100, 75, 42, 0.2));
-}
-
-.env {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 7 / 5;
-  perspective: 1100px;
-  /*
-   * Recorta el papel en los bordes inferior/lateral pero NO arriba.
-   * El valor -999px en top extiende el area de recorte hacia arriba
-   * para que el papel pueda emerger por la boca sin ser cortado.
-   */
-  clip-path: inset(-999px 0 0 0 round 0 0 14px 14px);
-}
-
-.env-back,
-.paper,
-.env-pocket,
-.env-flap,
-.seal {
-  position: absolute;
-}
-
-.env-back {
-  inset: 0;
-  z-index: 1;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.paper {
-  top: 14%;
-  left: 11%;
-  right: 11%;
-  z-index: 2;
-}
-
-.paper-sheet {
-  width: 100%;
-  padding: 1.4rem 1.1rem 1.3rem;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.10),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-  text-align: center;
-}
-
-.paper-eyebrow {
-  font-size: 0.56rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(112, 88, 50, 0.7);
-}
-
-.paper-name {
-  margin-top: 0.7rem;
-  font-family: var(--font-display, Georgia, serif);
-  font-size: clamp(1.3rem, 3vw, 2rem);
-  line-height: 1.06;
-  color: #4a3820;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}
-
-.paper-event {
-  margin-top: 0.55rem;
-  font-size: 0.62rem;
-  line-height: 1.42;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(98, 76, 44, 0.65);
-  text-wrap: balance;
-}
-
-.paper-divider {
-  margin: 0.85rem auto 0;
-  width: 46%;
-  height: 1px;
-  border-radius: 9999px;
-  background: rgba(128, 104, 68, 0.14);
-}
-
-.env-pocket {
-  top: 38%;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-  background: #f5f5f5;
-  border-bottom-left-radius: 14px;
-  border-bottom-right-radius: 14px;
-  border-top-left-radius: 50% 38%;
-  border-top-right-radius: 50% 38%;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.env-flap {
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56%;
-  z-index: 4;
-  transform-origin: center top;
-  clip-path: polygon(0 0, 100% 0, 50% 84%);
-  background: #ffffff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
-}
-
-.seal {
-  left: 50%;
-  top: 43%;
-  z-index: 5;
-  width: 3.4rem;
-  height: 3.4rem;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid rgba(100, 40, 60, 0.25);
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.seal-ring {
-  position: absolute;
-  inset: 22%;
-  border-radius: 50%;
-  border: 1.5px solid rgba(100, 40, 60, 0.2);
-}
-
-.anim-cover {
-  position: absolute;
-  background: #ffffff;
-}
-
-@media (max-width: 480px) {
-  .anim-scene {
-    width: min(90vw, 300px);
-  }
-
-  .paper-name {
-    font-size: clamp(1.15rem, 7vw, 1.75rem);
-  }
-
-  .seal {
-    width: 2.9rem;
-    height: 2.9rem;
-  }
-}
-
-.anim-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-</style>
