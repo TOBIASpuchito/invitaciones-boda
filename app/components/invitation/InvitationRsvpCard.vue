@@ -57,7 +57,9 @@ const initialPayload = computed<InvitationRsvpPayload>(() => ({
     : props.invitation.namedGuests).map(name => name.trim()).filter(Boolean),
 }))
 
-const isSubmitDisabled = computed(() => props.isSaving || !haveChanges.value)
+const hasExistingRsvp = computed(() => Boolean(props.invitation.rsvp))
+
+const isSubmitDisabled = computed(() => props.isSaving || (hasExistingRsvp.value && !haveChanges.value))
 
 const countOptions = computed(() => Array.from({ length: props.invitation.allowedGuests }, (_, index) => index + 1))
 
