@@ -235,7 +235,7 @@ useInvitationScrollReveal(sectionRef);
           </svg>
         </div>
         <p class="widget-label">Lugar</p>
-        <p class="widget-value">Quinta Kristal Hotel Boutique</p>
+        <p class="widget-value">Quinta krystal Hotel Boutique</p>
         <p class="mt-1 text-sm leading-6 text-stone-500">
           Principal de San Francisco de Alpahuma. Valle de los Chillos &mdash;
           Quito
