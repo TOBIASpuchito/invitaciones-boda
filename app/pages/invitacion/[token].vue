@@ -125,19 +125,19 @@ watch(
 
       <div v-if="pending && !invitation" class="mt-8 rounded-[2rem] border border-white/70 bg-white/80 p-8 text-center shadow-glow backdrop-blur">
         <p class="text-lg font-medium text-cocoa">
-          Cargando invitacion...
+          Cargando invitación...
         </p>
       </div>
 
       <div v-else-if="error || !invitation" class="mt-8 rounded-[2rem] border border-rose-200 bg-white/80 p-8 shadow-glow backdrop-blur">
         <p class="text-sm uppercase tracking-[0.35em] text-rose-600">
-          Invitacion no encontrada
+          Invitación no encontrada
         </p>
         <h1 class="mt-4 font-display text-4xl text-cocoa">
           No encontramos este enlace
         </h1>
         <p class="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-          Este enlace no corresponde a ninguna invitacion activa. Por favor verifica que hayas ingresado tu nombre correctamente o contacta a los novios.
+          Este enlace no corresponde a ninguna invitación activa. Por favor verifica que hayas ingresado tu nombre correctamente o contacta a los novios.
         </p>
       </div>
 

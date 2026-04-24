@@ -43,7 +43,7 @@ useInvitationScrollReveal(sectionRef);
       data-reveal-delay="0"
       class="text-sm uppercase tracking-[0.35em] text-wine/70"
     >
-      Tu invitacion
+      Tu invitación
     </p>
 
     <h1
@@ -59,8 +59,8 @@ useInvitationScrollReveal(sectionRef);
       data-reveal-delay="0.08"
       class="mt-4 text-lg leading-8 text-stone-600"
     >
-      Cindy y Marcelo tienen el honor de invitarte a celebrar el dia mas
-      especial de sus vidas. Esta pagina es tu invitacion personal.
+      Cindy y Marcelo tienen el honor de invitarte a celebrar el día más
+      especial de sus vidas. Esta página es tu invitación personal.
     </p>
 
     <!-- Foto de portada -->
@@ -235,7 +235,7 @@ useInvitationScrollReveal(sectionRef);
           </svg>
         </div>
         <p class="widget-label">Lugar</p>
-        <p class="widget-value">Quinta Boutique Kristal</p>
+        <p class="widget-value">Quinta Kristal Hotel Boutique</p>
         <p class="mt-1 text-sm leading-6 text-stone-500">
           Principal de San Francisco de Alpahuma. Valle de los Chillos &mdash;
           Quito

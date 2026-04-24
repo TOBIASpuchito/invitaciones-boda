@@ -92,7 +92,7 @@ async function createSingleAdminInvitation(
     )
 
     if (!rows[0]) {
-      throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitación.' })
     }
 
     return mapAdminInvitation(rows[0], null)
@@ -107,7 +107,7 @@ async function createSingleAdminInvitation(
       .maybeSingle()
 
     if (error) {
-      throw createError({ statusCode: 500, statusMessage: 'No se pudo validar el token de la invitacion.' })
+      throw createError({ statusCode: 500, statusMessage: 'No se pudo validar el token de la invitación.' })
     }
 
     return Boolean(data)
@@ -130,7 +130,7 @@ async function createSingleAdminInvitation(
     .single()
 
   if (error) {
-    throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitacion.' })
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo crear la invitación.' })
   }
 
   return mapAdminInvitation(data as SupabaseInvitationRow, null)
@@ -215,7 +215,7 @@ function assertDataAccessConfigured(
   if (!database && !client) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'La aplicacion no tiene acceso configurado a Supabase o Postgres.',
+      statusMessage: 'La aplicación no tiene acceso configurado a Supabase o Postgres.',
     })
   }
 }
@@ -320,7 +320,7 @@ async function findSupabaseInvitationByToken(token: string) {
     .maybeSingle()
 
   if (error) {
-    throw createError({ statusCode: 500, statusMessage: 'No se pudo consultar la invitacion.' })
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo consultar la invitación.' })
   }
 
   return (data ?? null) as SupabaseInvitationRow | null
@@ -540,7 +540,7 @@ export async function submitInvitationRsvp(token: string, payload: RsvpPayload) 
     .eq('id', invitationRow.id)
 
   if (updateError) {
-    throw createError({ statusCode: 500, statusMessage: 'No se pudo actualizar el estado de la invitacion.' })
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo actualizar el estado de la invitación.' })
   }
 
   return getInvitationByToken(token)
@@ -594,7 +594,7 @@ export async function deleteAdminInvitation(id: string) {
     .maybeSingle()
 
   if (error) {
-    throw createError({ statusCode: 500, statusMessage: 'No se pudo eliminar la invitacion.' })
+    throw createError({ statusCode: 500, statusMessage: 'No se pudo eliminar la invitación.' })
   }
 
   return Boolean(data)

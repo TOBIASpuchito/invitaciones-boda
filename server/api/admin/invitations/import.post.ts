@@ -8,12 +8,12 @@ const invitationSchema = z.object({
   displayName: z.string().trim().min(1, 'Cada invitado debe tener un nombre principal.').max(180),
   namedGuests: z.array(z.string().trim().min(1).max(80)).min(1, 'Cada fila debe tener al menos un nombre.').max(12),
   relationship: z.string().trim().max(120).default(''),
-  allowedGuests: z.number().int().min(1, 'Cada invitado debe tener al menos 1 cupo.').max(12, 'El maximo permitido es 12 cupos.'),
+  allowedGuests: z.number().int().min(1, 'Cada invitado debe tener al menos 1 cupo.').max(12, 'El máximo permitido es 12 cupos.'),
   notes: z.string().trim().max(400).optional(),
 })
 
 const importSchema = z.object({
-  invitations: z.array(invitationSchema).min(1, 'El archivo no contiene invitados validos.').max(1000, 'El archivo excede el maximo permitido de 1000 invitados.'),
+  invitations: z.array(invitationSchema).min(1, 'El archivo no contiene invitados válidos.').max(1000, 'El archivo excede el máximo permitido de 1000 invitados.'),
 })
 
 export default defineEventHandler(async (event) => {
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     invitations,
     createdCount: invitations.length,
     message: invitations.length === 1
-      ? 'Se importo 1 invitacion correctamente.'
+      ? 'Se importó 1 invitación correctamente.'
       : `Se importaron ${invitations.length} invitaciones correctamente.`,
   }
 })

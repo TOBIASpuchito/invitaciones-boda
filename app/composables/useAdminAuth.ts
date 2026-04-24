@@ -15,7 +15,7 @@ export function useAdminAuth() {
       await adminLogin(api, password)
       await navigateTo('/admin/dashboard')
     } catch (err) {
-      loginError.value = getApiErrorMessage(err, 'No se pudo iniciar sesion.')
+      loginError.value = getApiErrorMessage(err, 'No se pudo iniciar sesión.')
     } finally {
       loginLoading.value = false
     }
@@ -28,7 +28,7 @@ export function useAdminAuth() {
       await adminLogout(api)
       await navigateTo('/admin')
     } catch (err) {
-      console.error(getApiErrorMessage(err, 'No se pudo cerrar sesion.'))
+      console.error(getApiErrorMessage(err, 'No se pudo cerrar sesión.'))
     } finally {
       logoutLoading.value = false
     }

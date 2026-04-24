@@ -125,7 +125,7 @@ function statusLabel(status: InvitationStatus) {
   }
 
   if (status === 'declined') {
-    return 'No asistira'
+    return 'No asistirá'
   }
 
   return 'Pendiente'
@@ -237,14 +237,14 @@ async function handleImportFileChange(event: Event) {
     const firstSheetName = workbook.SheetNames[0]
 
     if (!firstSheetName) {
-      importError.value = 'El archivo no contiene una hoja valida.'
+      importError.value = 'El archivo no contiene una hoja válida.'
       return
     }
 
     const firstSheet = workbook.Sheets[firstSheetName]
 
     if (!firstSheet) {
-      importError.value = 'El archivo no contiene una hoja valida.'
+      importError.value = 'El archivo no contiene una hoja válida.'
       return
     }
 
@@ -290,14 +290,14 @@ async function handleImportFileChange(event: Event) {
       .filter((row): row is AdminCreateInvitationPayload => row !== null)
 
     if (!parsedRows.length) {
-      importError.value = 'No se encontraron invitados validos en el archivo.'
+      importError.value = 'No se encontraron invitados válidos en el archivo.'
       return
     }
 
     const invalidRow = parsedRows.find((row) => row.namedGuests.length > row.allowedGuests)
 
     if (invalidRow) {
-      importError.value = `La fila de ${invalidRow.displayName} tiene mas invitados nominales que cupos.`
+      importError.value = `La fila de ${invalidRow.displayName} tiene más invitados nominales que cupos.`
       return
     }
 
@@ -310,7 +310,7 @@ async function handleImportFileChange(event: Event) {
 
 async function importInvitationsFromExcel() {
   if (!importPreviewRows.value.length) {
-    importError.value = 'Primero selecciona un archivo Excel valido.'
+    importError.value = 'Primero selecciona un archivo Excel válido.'
     return
   }
 
@@ -386,7 +386,7 @@ async function createInvitation() {
     })
     resetCreateForm()
   } catch (err) {
-    createError.value = getApiErrorMessage(err, 'No se pudo crear la invitacion.')
+    createError.value = getApiErrorMessage(err, 'No se pudo crear la invitación.')
   } finally {
     createLoading.value = false
   }
@@ -412,7 +412,7 @@ async function executeDeleteInvitation() {
     const result = await remove(target.id)
     deleteSuccess.value = `${result.message} Invitado eliminado: ${target.displayName}.`
   } catch (err) {
-    deleteError.value = getApiErrorMessage(err, 'No se pudo eliminar la invitacion.')
+    deleteError.value = getApiErrorMessage(err, 'No se pudo eliminar la invitación.')
   }
 }
 </script>
@@ -432,7 +432,7 @@ async function executeDeleteInvitation() {
             </h1>
 
             <p class="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-              Vista centralizada para revisar confirmaciones, cantidad de asistentes, telefonos y mensajes recibidos.
+              Vista centralizada para revisar confirmaciones, cantidad de asistentes, teléfonos y mensajes recibidos.
             </p>
           </div>
 
@@ -455,7 +455,7 @@ async function executeDeleteInvitation() {
 
               <DropdownMenuItem class="text-rose-700 focus:bg-rose-50 focus:text-rose-700" :disabled="logoutLoading" @select="logout">
                 <LogOut class="h-4 w-4" />
-                {{ logoutLoading ? 'Saliendo...' : 'Cerrar sesion' }}
+                {{ logoutLoading ? 'Saliendo...' : 'Cerrar sesión' }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -491,7 +491,7 @@ async function executeDeleteInvitation() {
 
           <div class="rounded-[1.5rem] bg-stone-200 p-5">
             <p class="text-xs uppercase tracking-[0.25em] text-stone-600">
-              No asistiran
+              No asistirán
             </p>
             <p class="mt-3 font-display text-3xl text-stone-700">
               {{ stats.declined }}
@@ -508,11 +508,11 @@ async function executeDeleteInvitation() {
             </p>
 
             <h2 class="mt-4 font-display text-3xl text-cocoa sm:text-4xl">
-              Agregar una nueva invitacion
+              Agregar una nueva invitación
             </h2>
 
             <p class="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-              Crea invitados manualmente desde el panel. El token se genera automaticamente y queda disponible al instante.
+              Crea invitados manualmente desde el panel. El token se genera automáticamente y queda disponible al instante.
             </p>
 
             <div class="mt-6 rounded-[1.5rem] border border-blush/70 bg-sand/50 p-5">
@@ -570,7 +570,7 @@ async function executeDeleteInvitation() {
               </div>
 
               <div class="space-y-2">
-                <Label for="create-relationship">Relacion</Label>
+                <Label for="create-relationship">Relación</Label>
                 <Input
                   id="create-relationship"
                   v-model="createForm.relationship"
@@ -596,10 +596,10 @@ async function executeDeleteInvitation() {
                   id="create-named-guests"
                   v-model="createForm.namedGuestsText"
                   rows="4"
-                  placeholder="Un nombre por linea o separados por comas"
+                  placeholder="Un nombre por línea o separados por comas"
                 />
                 <p class="text-sm text-stone-500">
-                  Si lo dejas vacio, se usara el nombre principal como invitado nominal.
+                  Si lo dejas vacío, se usará el nombre principal como invitado nominal.
                 </p>
               </div>
 
@@ -632,13 +632,13 @@ async function executeDeleteInvitation() {
 
             <div class="mt-5 space-y-4 text-sm leading-7 text-stone-600">
               <p>
-                Usa el nombre visible tal como quieres que aparezca en la invitacion.
+                Usa el nombre visible tal como quieres que aparezca en la invitación.
               </p>
               <p>
-                Los invitados nominales se usan para la busqueda, el detalle de la invitacion y el formulario RSVP.
+                Los invitados nominales se usan para la búsqueda, el detalle de la invitación y el formulario RSVP.
               </p>
               <p>
-                Si luego eliminas una invitacion, tambien se eliminan sus respuestas RSVP registradas.
+                Si luego eliminas una invitación, también se eliminan sus respuestas RSVP registradas.
               </p>
             </div>
 
@@ -699,7 +699,7 @@ async function executeDeleteInvitation() {
                   Pendientes
                 </SelectItem>
                 <SelectItem value="declined">
-                  No asistiran
+                  No asistirán
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -718,7 +718,7 @@ async function executeDeleteInvitation() {
 
         <div v-if="activeFilters.search || activeFilters.status !== 'all'" class="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.18em] text-stone-500">
           <span v-if="activeFilters.search" class="rounded-full bg-sand px-3 py-2 text-cocoa">
-            Busqueda: {{ activeFilters.search }}
+            Búsqueda: {{ activeFilters.search }}
           </span>
           <span v-if="activeFilters.status !== 'all'" class="rounded-full bg-sand px-3 py-2 text-cocoa">
             Estado: {{ statusLabel(activeFilters.status) }}
@@ -738,7 +738,7 @@ async function executeDeleteInvitation() {
             No hay resultados con ese filtro.
           </p>
           <p class="mt-2 text-sm text-stone-500">
-            No encontramos invitados con ese nombre. Ajusta la busqueda o cambia el estado para volver a ver todas las invitaciones.
+            No encontramos invitados con ese nombre. Ajusta la búsqueda o cambia el estado para volver a ver todas las invitaciones.
           </p>
         </div>
 
@@ -751,7 +751,7 @@ async function executeDeleteInvitation() {
                     {{ invitation.displayName }}
                   </p>
                   <p class="mt-1 text-sm text-stone-500">
-                    {{ invitation.relationship || 'Sin relacion registrada' }}
+                    {{ invitation.relationship || 'Sin relación registrada' }}
                   </p>
                 </div>
                 <Badge :variant="invitation.status">
@@ -765,11 +765,11 @@ async function executeDeleteInvitation() {
                   <p class="mt-1 font-semibold text-cocoa">{{ invitation.confirmedCount ?? 0 }}/{{ invitation.allowedGuests }}</p>
                 </div>
                 <div>
-                  <p class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-400">Telefono</p>
+                  <p class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-400">Teléfono</p>
                   <p class="mt-1 font-semibold text-cocoa break-words">{{ invitation.rsvp?.phone || '—' }}</p>
                 </div>
                 <div class="col-span-2">
-                  <p class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-400">Ultimo RSVP</p>
+                  <p class="text-[0.65rem] uppercase tracking-[0.18em] text-stone-400">Último RSVP</p>
                   <p class="mt-1 font-semibold text-cocoa">{{ formatDate(invitation.rsvp?.submittedAt) }}</p>
                   <p v-if="invitation.rsvp?.guestNames.length" class="mt-1 text-xs text-stone-500 break-words">
                     {{ invitation.rsvp.guestNames.join(', ') }}
@@ -785,7 +785,7 @@ async function executeDeleteInvitation() {
                   :to="`/invitacion/${invitation.token}`"
                   class="inline-flex w-full items-center justify-center rounded-full border border-blush bg-sand/50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-cocoa transition hover:border-wine hover:text-wine sm:w-auto"
                 >
-                  Ver invitacion
+                  Ver invitación
                 </NuxtLink>
 
                 <Button
@@ -807,11 +807,11 @@ async function executeDeleteInvitation() {
             <TableHeader>
               <TableRow class="bg-sand/80 hover:bg-sand/80">
                 <TableHead>Invitado</TableHead>
-                <TableHead>Relacion</TableHead>
+                <TableHead>Relación</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Cupos</TableHead>
-                <TableHead>Ultimo RSVP</TableHead>
-                <TableHead>Telefono</TableHead>
+                <TableHead>Último RSVP</TableHead>
+                <TableHead>Teléfono</TableHead>
                 <TableHead class="text-right">
                   Acciones
                 </TableHead>
@@ -888,8 +888,8 @@ async function executeDeleteInvitation() {
       <DialogHeader>
         <DialogTitle>Eliminar invitado</DialogTitle>
         <DialogDescription>
-          Se eliminara a <strong class="font-semibold text-cocoa">{{ confirmTarget?.displayName }}</strong> junto
-          con todo su historial RSVP. Esta accion no se puede deshacer.
+          Se eliminará a <strong class="font-semibold text-cocoa">{{ confirmTarget?.displayName }}</strong> junto
+          con todo su historial RSVP. Esta acción no se puede deshacer.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>

@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!parsed.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud invalida.',
+      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud inválida.',
     })
   }
 

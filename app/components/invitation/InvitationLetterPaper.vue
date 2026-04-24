@@ -38,7 +38,7 @@ defineExpose({
         ref="eyebrowRef"
         class="text-[0.56rem] font-semibold uppercase tracking-[0.28em] text-[#705832]/70"
       >
-        Invitacion para
+        Invitación para
       </p>
 
       <p

@@ -34,7 +34,7 @@ export function useInvitationSearch() {
       await navigateTo(`/invitacion/${results[0].token}`)
     } catch (err) {
       stopInvitationMusic()
-      error.value = getApiErrorMessage(err, 'No pudimos buscar tu invitacion.')
+      error.value = getApiErrorMessage(err, 'No pudimos buscar tu invitación.')
     } finally {
       isSearching.value = false
     }

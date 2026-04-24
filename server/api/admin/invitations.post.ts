@@ -8,7 +8,7 @@ const createInvitationSchema = z.object({
   displayName: z.string().trim().min(1, 'Escribe el nombre principal del invitado.').max(180),
   namedGuests: z.array(z.string().trim().min(1).max(80)).min(1, 'Debes indicar al menos un nombre.').max(12),
   relationship: z.string().trim().max(120).default(''),
-  allowedGuests: z.number().int().min(1, 'Debe haber al menos 1 cupo.').max(12, 'El maximo permitido es 12 cupos.'),
+  allowedGuests: z.number().int().min(1, 'Debe haber al menos 1 cupo.').max(12, 'El máximo permitido es 12 cupos.'),
   notes: z.string().trim().max(400).optional(),
 })
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   if (!parsed.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud invalida.',
+      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud inválida.',
     })
   }
 
@@ -42,6 +42,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     invitation,
-    message: 'Invitacion creada correctamente.',
+    message: 'Invitación creada correctamente.',
   }
 })

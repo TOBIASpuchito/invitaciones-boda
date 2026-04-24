@@ -15,13 +15,13 @@ export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token')
 
   if (!token) {
-    throw createError({ statusCode: 400, statusMessage: 'Token de invitacion invalido.' })
+    throw createError({ statusCode: 400, statusMessage: 'Token de invitación inválido.' })
   }
 
   const invitation = await getInvitationByToken(token)
 
   if (!invitation) {
-    throw createError({ statusCode: 404, statusMessage: 'Invitacion no encontrada.' })
+    throw createError({ statusCode: 404, statusMessage: 'Invitación no encontrada.' })
   }
 
   const body = await readBody(event)
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   if (!parsed.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud RSVP invalida.',
+      statusMessage: parsed.error.issues[0]?.message ?? 'Solicitud RSVP inválida.',
     })
   }
 
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (payload.confirmedCount > invitation.allowedGuests) {
-      throw createError({ statusCode: 400, statusMessage: 'La confirmacion supera los cupos reservados.' })
+      throw createError({ statusCode: 400, statusMessage: 'La confirmación supera los cupos reservados.' })
     }
 
     if (payload.guestNames.length > payload.confirmedCount) {
@@ -63,13 +63,13 @@ export default defineEventHandler(async (event) => {
   const updatedInvitation = await submitInvitationRsvp(token, payload)
 
   if (!updatedInvitation) {
-    throw createError({ statusCode: 404, statusMessage: 'Invitacion no encontrada.' })
+    throw createError({ statusCode: 404, statusMessage: 'Invitación no encontrada.' })
   }
 
   return {
     invitation: updatedInvitation,
     message: payload.attendance === 'yes'
-      ? 'Tu confirmacion fue guardada correctamente.'
+      ? 'Tu confirmación fue guardada correctamente.'
       : 'Tu respuesta fue guardada correctamente.',
   }
 })

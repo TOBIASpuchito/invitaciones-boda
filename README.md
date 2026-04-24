@@ -2,10 +2,10 @@
 
 MVP en `Nuxt 4 + Tailwind + Supabase` para manejar:
 
-- busqueda inicial por nombre
-- invitacion unica por token
-- confirmacion RSVP
-- persistencia via server routes de Nuxt
+- búsqueda inicial por nombre
+- invitación única por token
+- confirmación RSVP
+- persistencia vía server routes de Nuxt
 
 ## Stack
 
@@ -19,7 +19,7 @@ MVP en `Nuxt 4 + Tailwind + Supabase` para manejar:
 1. El invitado entra al enlace general.
 2. Escribe su nombre.
 3. El sistema busca coincidencias.
-4. Selecciona su invitacion unica.
+4. Selecciona su invitación única.
 5. Confirma asistencia.
 
 ## Variables de entorno
@@ -44,7 +44,7 @@ Variables principales:
 
 ## Base de datos
 
-El esquema inicial esta en `supabase/schema.sql`.
+El esquema inicial está en `supabase/schema.sql`.
 
 Tablas incluidas:
 
@@ -58,7 +58,7 @@ bun install
 bun run dev
 ```
 
-Si faltan credenciales de `Supabase` o `Postgres`, la app falla de forma explicita y no usa datos falsos.
+Si faltan credenciales de `Supabase` o `Postgres`, la app falla de forma explícita y no usa datos falsos.
 
 Servidor local en `http://localhost:3000`.
 
@@ -81,14 +81,14 @@ La imagen compila la app con `bun` y ejecuta Nitro en producción con `node` sob
 
 ## Estructura clave
 
-- `app/pages/index.vue`: pantalla de busqueda
-- `app/pages/invitacion/[token].vue`: invitacion unica + RSVP
+- `app/pages/index.vue`: pantalla de búsqueda
+- `app/pages/invitacion/[token].vue`: invitación única + RSVP
 - `server/api/invitations/*`: APIs del MVP
 - `server/utils/invitations-repository.ts`: acceso a datos en Supabase/Postgres
 
 ## Eliminar un invitado
 
-El borrado de un invitado tambien elimina sus RSVP por la relacion `on delete cascade` en la tabla `rsvps`.
+El borrado de un invitado también elimina sus RSVP por la relación `on delete cascade` en la tabla `rsvps`.
 
 ```bash
 npm run delete-guest -- --token "jean-buenaventura"
@@ -100,9 +100,9 @@ Tambien puedes borrar por `id`:
 npm run delete-guest -- --id "uuid-del-invitado"
 ```
 
-## Siguiente iteracion recomendada
+## Siguiente iteración recomendada
 
 1. Importar tu Excel real a Supabase.
 2. Crear panel admin para ver confirmados, pendientes y rechazados.
-3. Agregar carga mas precisa por nombre + telefono o alias.
-4. Diseñar la invitacion final con branding de la boda.
+3. Agregar carga más precisa por nombre + teléfono o alias.
+4. Diseñar la invitación final con branding de la boda.

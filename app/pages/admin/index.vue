@@ -27,7 +27,7 @@ if (session.value?.authenticated) {
         </h1>
 
         <p class="mt-5 max-w-xl text-base leading-8 text-stone-600">
-          Desde aqui puedes revisar quienes ya confirmaron, quienes declinaron y los mensajes que dejaron al responder el RSVP.
+          Desde aquí puedes revisar quiénes ya confirmaron, quiénes declinaron y los mensajes que dejaron al responder el RSVP.
         </p>
 
         <div class="mt-8 grid gap-4 sm:grid-cols-3">
@@ -36,7 +36,7 @@ if (session.value?.authenticated) {
               Flujo
             </p>
             <p class="mt-3 text-lg font-semibold text-cocoa">
-              Login rapido
+              Login rápido
             </p>
           </div>
 
@@ -62,7 +62,7 @@ if (session.value?.authenticated) {
 
       <section class="rounded-[2rem] border border-white/80 bg-white/85 p-8 shadow-glow backdrop-blur sm:p-10">
         <p class="text-sm uppercase tracking-[0.35em] text-wine/70">
-          Iniciar sesion
+          Iniciar sesión
         </p>
 
         <form class="mt-6 space-y-5" @submit.prevent="login(password)">

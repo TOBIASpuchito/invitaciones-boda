@@ -90,7 +90,7 @@ const responseSummary = computed(() => {
     return `Respuesta guardada para ${props.invitation.rsvp.confirmedCount} ${label}.`
   }
 
-  return 'Respuesta guardada como no asistira.'
+  return 'Respuesta guardada como no asistirá.'
 })
 
 watch(
@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
     </div>
 
     <p data-reveal class="text-sm uppercase tracking-[0.35em] text-wine/70">
-      Confirmacion RSVP
+      Confirmación RSVP
     </p>
 
     <h2 data-reveal data-reveal-delay="0.04" class="mt-4 font-display text-3xl text-cocoa">
@@ -254,7 +254,7 @@ onBeforeUnmount(() => {
         {{ responseSummary }}
       </p>
       <p class="mt-2 text-sm text-emerald-700/90">
-        Ultima actualizacion: {{ formatSubmittedAt(invitation.rsvp.submittedAt) }}
+        Última actualización: {{ formatSubmittedAt(invitation.rsvp.submittedAt) }}
       </p>
     </div>
 
@@ -289,7 +289,7 @@ onBeforeUnmount(() => {
       <div v-if="attendance === 'yes'" class="space-y-5">
         <div data-reveal>
           <label for="confirmed-count" class="block text-sm font-medium text-cocoa">
-            Cuantos cupos confirmas
+            Cuántos cupos confirmas
           </label>
 
           <Select v-model="confirmedCountValue">
@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
 
         <div v-if="invitation.allowedGuests > 1" data-reveal>
           <label for="guest-names" class="block text-sm font-medium text-cocoa">
-            Nombres de quienes asistiran
+            Nombres de quienes asistirán
           </label>
 
           <textarea
@@ -322,7 +322,7 @@ onBeforeUnmount(() => {
 
       <div data-reveal>
         <label for="phone" class="block text-sm font-medium text-cocoa">
-          Telefono de contacto
+          Teléfono de contacto
         </label>
 
         <input

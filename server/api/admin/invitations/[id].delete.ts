@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { requireAdminSession } from '../../../utils/admin-auth'
 import { deleteAdminInvitation } from '../../../utils/invitations-repository'
 
-const invitationIdSchema = z.string().uuid('Identificador de invitacion invalido.')
+const invitationIdSchema = z.string().uuid('Identificador de invitación inválido.')
 
 export default defineEventHandler(async (event) => {
   requireAdminSession(event)
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   if (!parsedId.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: parsedId.error.issues[0]?.message ?? 'Identificador invalido.',
+      statusMessage: parsedId.error.issues[0]?.message ?? 'Identificador inválido.',
     })
   }
 
@@ -24,12 +24,12 @@ export default defineEventHandler(async (event) => {
   if (!deleted) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Invitacion no encontrada.',
+      statusMessage: 'Invitación no encontrada.',
     })
   }
 
   return {
     ok: true,
-    message: 'Invitacion eliminada correctamente.',
+    message: 'Invitación eliminada correctamente.',
   }
 })

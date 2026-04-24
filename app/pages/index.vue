@@ -24,14 +24,14 @@ onMounted(() => {
         </h1>
 
         <p class="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-          Escribe tus nombres y apellidos para encontrar tu invitacion y confirmar tu asistencia en un solo paso.
+          Escribe tu nombre y apellido para encontrar tu invitación y confirmar tu asistencia en un solo paso.
         </p>
 
         <div class="mt-10 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-glow backdrop-blur sm:p-8">
           <form class="space-y-4" @submit.prevent="searchInvitations">
             <div>
               <label for="guest-name" class="block text-sm font-medium text-cocoa">
-                Nombres y apellidos
+                Nombre y apellido
               </label>
 
               <input
@@ -49,7 +49,7 @@ onMounted(() => {
               :disabled="isSearching"
               class="inline-flex w-full items-center justify-center rounded-2xl bg-wine px-5 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-cocoa disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {{ isSearching ? 'Buscando...' : 'Buscar mi invitacion' }}
+              {{ isSearching ? 'Buscando...' : 'Buscar mi invitación' }}
             </button>
 
             <p v-if="searchError" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -103,7 +103,7 @@ onMounted(() => {
                 RSVP
               </p>
               <p class="mt-3 text-lg font-medium leading-7">
-                Si encontramos tu nombre, te llevaremos directo a tu invitacion para confirmar asistencia.
+                Si encontramos tu nombre, te llevaremos directo a tu invitación para confirmar asistencia.
               </p>
             </div>
           </div>

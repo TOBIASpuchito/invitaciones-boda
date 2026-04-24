@@ -6,13 +6,13 @@ export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token')
 
   if (!token) {
-    throw createError({ statusCode: 400, statusMessage: 'Token de invitacion invalido.' })
+    throw createError({ statusCode: 400, statusMessage: 'Token de invitación inválido.' })
   }
 
   const invitation = await getInvitationByToken(token)
 
   if (!invitation) {
-    throw createError({ statusCode: 404, statusMessage: 'Invitacion no encontrada.' })
+    throw createError({ statusCode: 404, statusMessage: 'Invitación no encontrada.' })
   }
 
   return { invitation }

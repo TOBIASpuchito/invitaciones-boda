@@ -19,7 +19,7 @@ export function ensureAdminPasswordConfigured() {
   if (!getAdminPassword()) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'La clave de administrador no esta configurada.',
+      statusMessage: 'La clave de administrador no está configurada.',
     })
   }
 }
@@ -87,7 +87,7 @@ export function requireAdminSession(event: H3Event) {
   if (!hasValidAdminSession(event)) {
     throw createError({
       statusCode: 401,
-      statusMessage: 'Debes iniciar sesion como administrador.',
+      statusMessage: 'Debes iniciar sesión como administrador.',
     })
   }
 }
