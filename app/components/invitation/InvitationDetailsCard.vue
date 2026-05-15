@@ -142,11 +142,6 @@ useInvitationScrollReveal(sectionRef);
           >s</span
         >
       </span>
-      <span
-        class="rounded-full bg-sand px-4 py-2 text-sm font-medium text-cocoa"
-      >
-        RSVP hasta {{ rsvpDeadline }}
-      </span>
     </div>
 
     <div data-reveal data-reveal-delay="0.08" class="mt-8 rounded-[1.75rem] bg-sand p-6">
