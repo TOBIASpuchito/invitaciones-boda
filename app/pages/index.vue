@@ -39,7 +39,7 @@ onMounted(() => {
                 v-model="guestName"
                 type="text"
                 autocomplete="name"
-                placeholder="Ej. Jean Buenaventura"
+                placeholder="Tu nombre más tu apellido"
                 class="mt-3 w-full rounded-2xl border border-blush bg-sand/60 px-5 py-4 text-base text-cocoa outline-none transition placeholder:text-stone-400 focus:border-wine focus:ring-2 focus:ring-wine/20"
               >
             </div>
